@@ -373,8 +373,9 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   const DEFAULT_SETTINGS = {
     fieldLength: 100, kickoffSpot: 40, touchbackSpot: 20, safetyKickSpot: 20, trySpot: 3,
     ptsTD: 6, ptsFG: 3, ptsKick: 1, pts2pt: 2, ptsSafety: 2,
-    firstDownYards: 10, timeoutsPerHalf: 3, quarters: 4,
-    sackCountsAsRush: true, kneelCountsAsRush: true
+    firstDownYards: 10, timeoutsPerHalf: 3, quarters: 4, quarterMinutes: 12,
+    sackCountsAsRush: true, kneelCountsAsRush: true,
+    myTeam: 'home', trackOpponents: true, askClock: true
   };
 
   function dir(team) { return team === 'home' ? 1 : -1; }
@@ -439,7 +440,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       score: { home: 0, away: 0 },
       timeouts: { home: S.timeoutsPerHalf, away: S.timeoutsPerHalf },
       snapshot: null, snapshotIndex: -1,
-      driveNo: 0, driveTeam: null, driveStart: null,
+      driveNo: 0, driveTeam: null, driveStart: null, drivePlays: 0,
       final: false, note: ''
     };
   }
@@ -455,7 +456,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     st.lineToGain = ltg;
   }
   function beginDrive(st, team, spot) {
-    st.driveNo += 1; st.driveTeam = team; st.driveStart = spot;
+    st.driveNo += 1; st.driveTeam = team; st.driveStart = spot; st.drivePlays = 0;
   }
   function setTry(st, team, game) {
     st.phase = 'try'; st.possession = team; st.kickTeam = null;
@@ -546,6 +547,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       case 'rush': {
         const team = ev.team || st.possession || 'home';
         if (st.phase !== 'play' || st.possession !== team) { st.phase = 'play'; st.possession = team; st.kickTeam = null; if (st.lineToGain == null) { let l = st.spot + 10 * dir(team); if ((goal(team, L) - l) * dir(team) <= 0) l = goal(team, L); st.lineToGain = l; } }
+        st.drivePlays = (st.drivePlays || 0) + 1;
         const def = opp(team), start = st.spot;
         let end;
         if (ev.result === 'td') end = goal(team, L);
@@ -588,6 +590,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       case 'pass': {
         const team = ev.team || st.possession || 'home';
         if (st.phase !== 'play' || st.possession !== team) { st.phase = 'play'; st.possession = team; st.kickTeam = null; if (st.lineToGain == null) { let l = st.spot + 10 * dir(team); if ((goal(team, L) - l) * dir(team) <= 0) l = goal(team, L); st.lineToGain = l; } }
+        st.drivePlays = (st.drivePlays || 0) + 1;
         const def = opp(team), start = st.spot;
         const res = ev.spike ? 'incomplete' : ev.result;
         flags.start = start;
@@ -950,6 +953,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         break;
       }
       case 'game_end': { st.final = true; st.phase = 'final'; break; }
+      case 'clock': { flags.clock = ev.clock; break; }
       case 'note': break;
       default: break;
     }
@@ -977,7 +981,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     }
     const stats = computeStats(game, derived);
     const drives = computeDrives(game, derived);
-    return { final: clone(st), derived, states, stats, drives };
+    const top = computeTOP(game, derived);
+    return { final: clone(st), derived, states, stats, drives, top };
   }
 
   // state just before event index i (or final state when i == events.length)
@@ -1035,6 +1040,46 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       }
     });
     return drives;
+  }
+
+  /* ---------- game clock & time of possession ----------
+     A clock reading is the time left in the quarter when a play was snapped (or when a Clock entry
+     was made). Between two readings, the elapsed time is credited to the team with the ball, split by
+     scrimmage-play count when both teams ran plays in that span. Quarter ends are implicit readings. */
+  function parseClock(v) {
+    if (v == null) return null;
+    const s = String(v).trim(); if (!s) return null;
+    let m = /^(\d{1,2}):(\d{2})$/.exec(s); if (m) return Number(m[1]) * 60 + Number(m[2]);
+    m = /^(\d{1,2})(\d{2})$/.exec(s); if (m) return Number(m[1]) * 60 + Number(m[2]);
+    m = /^(\d{1,2})$/.exec(s); if (m) return Number(m[1]);
+    return null;
+  }
+  function fmtClock(sec) { sec = Math.max(0, Math.round(num(sec, 0))); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+  function computeTOP(game, derived) {
+    const S = settingsOf(game), Q = (S.quarterMinutes || 12) * 60;
+    const events = game.events || [];
+    const absTime = (quarter, remaining) => (Math.max(1, quarter) - 1) * Q + (Q - clamp(remaining, 0, Q));
+    const pts = [];
+    events.forEach((ev, i) => {
+      const d = derived[i]; if (!d) return;
+      const q = d.before.quarter;
+      if (i === 0 && (ev.type === 'kickoff' || ev.type === 'clock')) pts.push({ i, t: absTime(q, Q), explicit: false });
+      const c = parseClock(ev.clock);
+      if (c != null) pts.push({ i, t: absTime(q, c), explicit: true });
+      if (ev.type === 'period_end' || ev.type === 'game_end') pts.push({ i, t: absTime(q, 0), explicit: false });
+    });
+    const top = { home: 0, away: 0 };
+    let explicit = 0, approx = false; pts.forEach(p => { if (p.explicit) explicit++; });
+    for (let k = 0; k + 1 < pts.length; k++) {
+      const A = pts[k], B = pts[k + 1];
+      const el = B.t - A.t; if (el <= 0) continue;
+      if (!A.explicit && !B.explicit) approx = true; // a span with no reading at either end is split by play count
+      const counts = { home: 0, away: 0 }; let any = 0;
+      for (let i = A.i; i < B.i; i++) { const ev = events[i], d = derived[i]; if (!d || d.nullified) continue; if (ev.type === 'rush' || ev.type === 'pass') { counts[d.before.possession] += 1; any++; } }
+      if (any) { top.home += el * counts.home / any; top.away += el * counts.away / any; }
+      else { const d = derived[A.i]; const poss = d && (d.after.phase === 'kickoff' || d.after.phase === 'free_kick' ? d.after.kickTeam : d.after.possession); if (poss && d.after.phase !== 'final') top[poss] += el; }
+    }
+    return { home: Math.round(top.home), away: Math.round(top.away), clocks: explicit, reliable: explicit >= 2, approx };
   }
 
   /* ---------- descriptions ---------- */
@@ -1162,6 +1207,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       case 'situation': s = 'Situation set: ' + dd(after, game) + (ev.note ? ' — ' + ev.note : ''); break;
       case 'safety': s = 'SAFETY, 2 points ' + ab(ev.team || opp(team)); break;
       case 'game_end': s = 'FINAL'; break;
+      case 'clock': s = 'Clock ' + fmtClock(parseClock(ev.clock) || 0) + (ev.note ? ' — ' + ev.note : ''); break;
       case 'note': s = ev.text || 'Note'; break;
     }
     if (f && f.downs) s += '. Turnover on downs';
@@ -1261,6 +1307,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return true;
   }
 
+  function tracksPlayers(game, team) { const S = settingsOf(game); return S.trackOpponents !== false || team === (S.myTeam || 'home'); }
+
   /* ---------- game factory ---------- */
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
   function newGame(opts) {
@@ -1295,7 +1343,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     dir, opp, goal, ownGoal, gain, toGoal, half, clamp, num, settingsOf,
     kickSpotFor, touchbackSpot, trySpot, spotParts, fmtSpot, fmtYard, absFrom,
     makeState, applyEvent, replay, stateBefore, computeStats, computeDrives,
-    describe, dd, ordinal, pname, newGame, uid, homeOnLeft, clone, parseRoster, convertFieldLength
+    describe, dd, ordinal, pname, newGame, uid, homeOnLeft, clone, parseRoster, convertFieldLength, parseClock, fmtClock, computeTOP, tracksPlayers
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Engine = api;
@@ -1611,7 +1659,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     } else el.append(...digits, alt, zero, bs);
     function paint() {
       alt.disabled = false; alt.classList.remove('go');
-      if (t.kind === 'yards') alt.textContent = '±';
+      if (t.kind === 'clock') alt.textContent = t.full || '12:00';
+      else if (t.kind === 'yards') alt.textContent = '±';
       else if (t.kind === 'jersey') { alt.textContent = buf ? 'Add #' + buf : 'Add'; alt.classList.toggle('go', !!buf); alt.disabled = !buf; }
       else if (t.kind === 'yardline') alt.textContent = String(t.mid != null ? t.mid : 50);
       else { alt.textContent = ''; alt.disabled = true; }
@@ -1619,6 +1668,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     }
     function apply() {
       if (t.kind === 'jersey') { if (t.onChange) t.onChange(buf); paint(); return; }
+      if (t.kind === 'clock') { const d = buf.padStart(3, '0'); t.set(buf ? Number(d.slice(0, -2)) + ':' + d.slice(-2) : ''); paint(); return; }
       let v = Number(buf || 0);
       if (t.kind === 'yards' && neg) v = -v;
       if (t.max != null) v = Math.min(v, t.max);
@@ -1629,11 +1679,13 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       if (k.startsWith('side:')) { buf = ''; fresh = true; t.sides.onChange(k.slice(5)); paint(); return; }
       if (k === 'bs') { buf = fresh ? '' : buf.slice(0, -1); fresh = false; apply(); return; }
       if (k === 'alt') {
+        if (t.kind === 'clock') { buf = ''; fresh = true; t.set(t.full || '12:00'); paint(); return; }
         if (t.kind === 'yards') { if (fresh) { buf = String(Math.abs(Number(t.get()) || 0)); fresh = false; } neg = !neg; apply(); }
         else if (t.kind === 'jersey') { const v = buf; if (!v) return; buf = ''; fresh = true; paint(); if (t.onDone) t.onDone(v); }
         else if (t.kind === 'yardline') { buf = String(t.mid != null ? t.mid : 50); fresh = true; apply(); }
         return;
       }
+      if (t.kind === 'clock') { buf = (fresh ? '' : buf) + k; fresh = false; if (buf.length > 4) buf = buf.slice(-4); apply(); return; }
       if (fresh) { buf = k; fresh = false; if (t.kind === 'yards') neg = false; }
       else {
         const nb = buf + k;
@@ -1666,7 +1718,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     document.body.append(root);
     let steps = [], cur = null;
     const visited = new Set();
-    const compute = () => { steps = o.flow(g, ev, ctx); };
+    const compute = () => { steps = o.flow(g, ev, ctx).filter(s => !(s.omit && s.omit())); };
     const idxOf = id => steps.findIndex(s => s.id === id);
     const skipped = s => !!(s.skip && s.skip());
     const api = {
@@ -1740,6 +1792,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const sel = n => o.multi ? cur().map(String).includes(String(n)) : String(cur()) === String(n);
     return {
       id: o.id, q: o.q, label: o.label || o.q, optional: o.optional, skip: o.skip, hasValue: has, skipLabel: o.skipLabel,
+      omit: () => !E.tracksPlayers(game(), o.team) || (o.omit && o.omit()),
       valid: () => !!o.optional || has(),
       summary: () => { const g = game(); const v = o.multi ? cur() : (cur() ? [cur()] : []); return v.map(n => pname(g, o.team, n)).join(', ') || (o.optional ? 'none' : ''); },
       render(body, api) {
@@ -1797,6 +1850,9 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           tog.replaceChildren(...['home', 'away'].map(t => h('button', { type: 'button', class: ev[o.kTeam] === t ? 'on' : '', onclick: () => { if (ev[o.kTeam] !== t) { ev[o.kTeam] = t; ev[o.kPlayer] = ''; if (o.onTeam) o.onTeam(t); draw(); api.refresh(); } } }, (o.teams && o.teams[t]) || ab(g, t))));
           grid.replaceChildren();
           const T = ev[o.kTeam];
+          const tracked = E.tracksPlayers(g, T);
+          lbl.hidden = !tracked; grid.hidden = !tracked;
+          if (!tracked) return;
           roster(g, T).forEach(p => grid.append(chipEl(p.num, p.name || p.pos, String(ev[o.kPlayer]) === String(p.num), () => pick(p.num))));
           if (ev[o.kPlayer] && !roster(g, T).some(p => String(p.num) === String(ev[o.kPlayer]))) grid.append(chipEl(ev[o.kPlayer], 'added', true, () => pick(ev[o.kPlayer])));
           grid.append(h('button', { type: 'button', class: 'pchip other', onclick: () => jerseyPad(body, g, T, v => { body.replaceChildren(tog, lbl, grid); pick(v); }, () => { body.replaceChildren(tog, lbl, grid); draw(); }) }, h('b', null, 'other #'), h('span', null, 'type a number')));
@@ -1878,6 +1934,24 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       }
     };
   }
+  // game-clock step (mm:ss on the keypad); writes ev[key]
+  function clockStep(o) {
+    const ev = o.ev, key = o.key || 'clock';
+    const good = () => !!ev[key] && /^\d{1,2}:\d{2}$/.test(ev[key]) && Number(ev[key].split(':')[1]) < 60 && E.parseClock(ev[key]) <= o.quarterSeconds;
+    const valid = () => (o.required ? good() : (!ev[key] || good()));
+    return {
+      id: o.id || 'clock', q: o.q || 'Game clock at the snap?', label: o.label || 'Clock', optional: !o.required, hasValue: () => !!ev[key], skipLabel: 'Skip the clock',
+      omit: o.omit, valid,
+      summary: () => ev[key] || (o.required ? '' : 'not entered'),
+      render(body, api) {
+        const read = h('div', { class: 'kp-big num' }, ev[key] || '–:––');
+        const hint = h('div', { class: 'help' }, o.hint || 'Time left in the quarter, typed like a microwave: 1, 1, 4, 2 is 11:42. Tap ' + E.fmtClock(o.quarterSeconds) + ' for the top of a quarter.');
+        const warn = h('div', { class: 'err', hidden: true }, 'That is not a real clock time.');
+        const kp = makeKeypad({ kind: 'clock', full: E.fmtClock(o.quarterSeconds), get: () => ev[key], set: v => { ev[key] = v; read.textContent = v || '–:––'; warn.hidden = !ev[key] || good(); api.refresh(); } });
+        body.append(read, hint, kp.el, warn);
+      }
+    };
+  }
   // read-only step (spike, notes)
   function infoStep(o) { return { id: o.id, q: o.q, label: o.label || o.q, valid: () => true, summary: () => o.summary || '', render(body) { body.append(h('div', { class: 'help' }, o.text)); } }; }
   function offenseStep(ev, q, g) {
@@ -1902,7 +1976,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return steps;
   }
 
-  window.CC.Wizard = { openWizard, closeWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps, chipEl };
+  window.CC.Wizard = { openWizard, closeWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps, clockStep, chipEl };
 })();
 
 /* Chain Crew UI — the question sequence for each play type, built on the wizard. */
@@ -1910,15 +1984,23 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   'use strict';
   const E = window.Engine, C = window.CC, W = C.Wizard;
   const { h, toast, UI, ab, pname, commit } = C;
-  const { openWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps } = W;
+  const { openWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps, clockStep } = W;
   const game = C.game, getR = C.getR;
 
   const flows = {};
   const notPlay = (st, team) => st.phase !== 'play' || st.possession !== team;
+  // ask for the game clock on the first play of a drive (when the setting is on and nobody just logged it)
+  const driveClock = (g, ev, ctx) => {
+    const S = E.settingsOf(g), st = ctx.state;
+    const prev = ctx.prev;
+    const wanted = S.askClock !== false && st.phase === 'play' && !(st.drivePlays > 0) && !(prev && (prev.type === 'clock' || prev.clock));
+    if (!wanted && !ev.clock) return [];
+    return [clockStep({ ev, key: 'clock', quarterSeconds: (S.quarterMinutes || 12) * 60, q: 'Game clock at the snap?', hint: 'First play of the drive: enter the clock for time of possession, or skip it. Typed like a microwave: 1, 1, 4, 2 is 11:42.' })];
+  };
   const fumbleStart = (ev, st, team) => () => (ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.yards, 0) * E.dir(team), 0, E.settingsOf(game()).fieldLength) : E.num(ev.endSpot, st.spot));
 
   flows.rush = (g, ev, ctx) => {
-    const st = ctx.state, steps = [];
+    const st = ctx.state, steps = [...driveClock(g, ev, ctx)];
     if (!ev.team) ev.team = st.possession || 'home';
     if (!ev.result) ev.result = 'tackled';
     if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team has the ball?', g));
@@ -1933,7 +2015,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   };
 
   flows.pass = (g, ev, ctx) => {
-    const st = ctx.state, steps = [];
+    const st = ctx.state, steps = [...driveClock(g, ev, ctx)];
     if (!ev.team) ev.team = st.possession || 'home';
     if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team has the ball?', g));
     const team = ev.team, def = E.opp(team);
@@ -1969,7 +2051,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   };
 
   flows.punt = (g, ev, ctx) => {
-    const st = ctx.state, steps = [], L = E.settingsOf(g).fieldLength;
+    const st = ctx.state, steps = [...driveClock(g, ev, ctx)], L = E.settingsOf(g).fieldLength;
     if (!ev.team) ev.team = st.possession || 'home';
     if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team is punting?', g));
     const K = ev.team, Rt = E.opp(K);
@@ -2058,7 +2140,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     };
   }
   flows.fg = (g, ev, ctx) => {
-    const st = ctx.state, steps = [];
+    const st = ctx.state, steps = [...driveClock(g, ev, ctx)];
     if (!ev.team) ev.team = st.possession || 'home';
     if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team is kicking?', g));
     const K = ev.team, Rt = E.opp(K), S = E.settingsOf(g);
@@ -2219,6 +2301,10 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return steps;
   };
 
+  flows.clock = (g, ev, ctx) => {
+    const S = E.settingsOf(g);
+    return [clockStep({ ev, key: 'clock', required: true, quarterSeconds: (S.quarterMinutes || 12) * 60, q: 'What does the clock say?', label: 'Clock', hint: 'Time left in the quarter. Log it at the start of a drive, after a score, or whenever it helps the possession count. Typed like a microwave: 1, 1, 4, 2 is 11:42.' })];
+  };
   flows.timeout = (g, ev, ctx) => {
     const st = ctx.state;
     return [choiceStep({ id: 'team', q: 'Timeout by whom?', label: 'Timeout', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name, sub: st.timeouts[t] + ' left' })), get: () => ev.team, set: v => { ev.team = v; } })];
@@ -2231,7 +2317,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     render(body, api) { body.append(h('input', { type: 'text', value: ev.text || '', placeholder: 'Injury timeout, lightning delay, …', oninput: e => { ev.text = e.target.value; api.refresh(); } })); }
   }];
 
-  const TITLES = { rush: 'Run', pass: 'Pass', punt: 'Punt', kickoff: 'Kickoff', fg: 'Field goal', pat: 'PAT / 2-pt', penalty: 'Penalty', situation: 'Set the situation', timeout: 'Timeout', safety: 'Safety', note: 'Note', period_end: 'End of quarter', game_end: 'End of game' };
+  const TITLES = { rush: 'Run', pass: 'Pass', punt: 'Punt', kickoff: 'Kickoff', fg: 'Field goal', pat: 'PAT / 2-pt', penalty: 'Penalty', situation: 'Set the situation', timeout: 'Timeout', safety: 'Safety', note: 'Note', clock: 'Game clock', period_end: 'End of quarter', game_end: 'End of game' };
 
   // open the wizard for a new event (appended), an edit (index) or an insert (insertAt)
   function openForm(type, o) {
@@ -2242,7 +2328,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     else { ev = Object.assign({ type }, o.preset || {}); if (o.insertAt != null) insertAt = o.insertAt; }
     const at = index != null ? index : (insertAt != null ? insertAt : g.events.length);
     const state = at >= g.events.length ? getR().final : E.stateBefore(g, at);
-    const ctx = { state, index: at, quarter: state.quarter };
+    const ctx = { state, index: at, quarter: state.quarter, prev: at > 0 ? g.events[at - 1] : null };
     openWizard({
       title: (index != null ? 'Edit ' : (insertAt != null ? 'Insert ' : '')) + (o.title || TITLES[type] || type),
       ev, ctx, flow: flows[type], startAtLast: index != null,
@@ -2344,7 +2430,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     } else sit.append(h('div', { class: 'dd' }, st.phase === 'kickoff' ? ab(g, st.kickTeam) + ' kicks off' : st.phase === 'free_kick' ? ab(g, st.kickTeam) + ' free kicks' : st.phase === 'try' ? ab(g, st.possession) + ' try' : st.final ? 'Final' : 'Set the situation', ' ', h('small', null, st.phase === 'kickoff' || st.phase === 'free_kick' ? 'from the ' + E.fmtSpot(st.spot, g) : '')));
     const drive = R.drives.length ? R.drives[R.drives.length - 1] : null;
     const driveTxt = drive && st.phase === 'play' && drive.team === st.possession && !drive.result ? ab(g, drive.team) + ' drive · ' + drive.plays + ' play' + (drive.plays === 1 ? '' : 's') + ' · ' + E.fmtYard(drive.yards) + ' yds · started at the ' + E.fmtSpot(drive.start, g) : (st.phase === 'play' && st.possession ? ab(g, st.possession) + ' ball' : '');
-    sit.append(h('div', { class: 'row' }, h('span', { class: 'drive' }, driveTxt), h('button', { type: 'button', class: 'linkbtn', onclick: () => openForm('situation') }, 'Set situation')));
+    sit.append(h('div', { class: 'row' }, h('span', { class: 'drive' }, driveTxt), h('button', { type: 'button', class: 'linkbtn', onclick: () => openForm('clock') }, 'Clock'), h('button', { type: 'button', class: 'linkbtn', onclick: () => openForm('situation') }, 'Set situation')));
     wrap.append(sit);
     if (L === 80) wrap.append(h('div', { class: 'card flag row', style: 'justify-content:space-between' }, h('div', { class: 'grow' }, h('div', { class: 'lbl' }, '80-yard field'), h('div', { class: 'small' }, 'This game is set to an 80-yard field, so the yard lines stop at 40. Plays already entered are kept.')), h('button', { type: 'button', class: 'btn sm primary', onclick: () => commit(gg => { E.convertFieldLength(gg, 100); }, 'Converted to a 100-yard field') }, 'Switch to 100 yards')));
     const fw = h('div', { class: 'field-wrap' }, fieldSVG(g, st.quarter, { spot: st.phase === 'final' ? null : st.spot, lineToGain: st.phase === 'play' ? st.lineToGain : null, team: st.phase === 'play' ? st.possession : null }),
@@ -2391,6 +2477,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       item('Safety', 'not from a run or sack', () => openForm('safety'));
       item('Set the situation', 'fix possession, spot, down, score or quarter', () => openForm('situation'));
       item('Flip the field view', 'display only — data is never affected', () => flipView(g, st.quarter));
+      item('Log the game clock', 'for time of possession', () => openForm('clock'));
       item('Add a note to the log', '', () => openForm('note'));
       item('End the game now', 'marks it final', () => commit(gg => gg.events.push({ type: 'game_end' }), 'Game marked final'));
       body.append(m);
@@ -2504,7 +2591,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       r('Turnovers', t => String(t.turnovers || 0)),
       r('3rd down', t => (t.thirdConv || 0) + ' of ' + (t.thirdAtt || 0)),
       r('4th down', t => (t.fourthConv || 0) + ' of ' + (t.fourthAtt || 0)),
-      r('Timeouts used', t => String(t.timeouts || 0))
+      r('Timeouts used', t => String(t.timeouts || 0)),
+      { k: 'Time of possession' + (R.top && R.top.reliable && R.top.approx ? ' (≈)' : ''), home: R.top && R.top.reliable ? E.fmtClock(R.top.home) : '—', away: R.top && R.top.reliable ? E.fmtClock(R.top.away) : '—' }
     ];
   }
   function lineScore(g, R) {
@@ -2548,7 +2636,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const sc = scoringSummary(g, R);
     if (sc.length) wrap.append(h('div', { class: 'card' }, h('h3', null, 'Scoring'), h('ul', { class: 'scoring' }, ...sc.map(s => h('li', null, h('span', { class: 'q' }, s.q > 4 ? 'OT' : 'Q' + s.q), h('b', null, ab(g, s.team) + ' '), s.text, h('span', { class: 'sc' }, s.score.home + '–' + s.score.away))))));
     const tr = teamStatRows(g, R);
-    wrap.append(h('div', { class: 'card' }, h('h3', null, 'Team'), h('div', { class: 'kv' }, h('span'), h('span', { class: 'h' }, ab(g, 'home')), h('span', { class: 'h' }, ab(g, 'away')), ...tr.flatMap(r => [h('span', { class: 'k' }, r.k), h('span', { class: 'v' }, r.home), h('span', { class: 'v' }, r.away)]))));
+    wrap.append(h('div', { class: 'card' }, h('h3', null, 'Team'), h('div', { class: 'kv' }, h('span'), h('span', { class: 'h' }, ab(g, 'home')), h('span', { class: 'h' }, ab(g, 'away')), ...tr.flatMap(r => [h('span', { class: 'k' }, r.k), h('span', { class: 'v' }, r.home), h('span', { class: 'v' }, r.away)])), R.top && !R.top.reliable ? h('div', { class: 'help', style: 'margin-top:8px' }, 'Time of possession needs the game clock: enter it when a drive starts (the app asks) or with the Clock button on the Game tab.') : (R.top && R.top.approx ? h('div', { class: 'help', style: 'margin-top:8px' }, '≈ some stretches had no clock reading and were split by play count. Log the clock at each drive start for exact possession time.') : null)));
     wrap.append(h('div', { class: 'teamtabs' }, ...['home', 'away'].map(t => h('button', { type: 'button', class: UI.statsTeam === t ? 'on' : '', onclick: () => { UI.statsTeam = t; render(); } }, g.teams[t].name))));
     const t = UI.statsTeam;
     let any = false;
@@ -2761,6 +2849,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       wrap.append(section(g.teams.home.name + ' (home) roster', open, b => teamEditor(b, g, 'home')));
       wrap.append(section(g.teams.away.name + ' (away) roster', open, b => teamEditor(b, g, 'away')));
       wrap.append(section('Field, kickoff and orientation', open, b => startEditor(b, g, R)));
+      wrap.append(section('Our team, opponent players & clock', open, b => trackingEditor(b, g)));
       wrap.append(section('Rules & scoring', false, b => settingsEditor(b, g)));
       wrap.append(section('Export, PDF & backup', false, b => {
         b.append(exportButtons(g, R));
@@ -2819,6 +2908,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     p('The field picture only shows which direction each team is going; flipping it never changes a play. It flips by itself after the 1st and 3rd quarters.');
     p('Penalties: pick the foul, who it is on, accepted or declined, and whether it is marked off from where the ball is (dead-ball fouls, or fouls tacked on after a play) or from the previous spot (the last play is wiped out and its stats removed). Half the distance is applied automatically. The Result box shows the new down and distance before you save, and you can adjust it by hand when the officials do something unusual.');
     p('Sacks count as rushing attempts for the quarterback (high-school and college convention). Two tacklers on a play each get an assist, and share a sack or tackle for loss. Kneel-downs count as rushes. All of this can be changed under Rules & scoring.');
+    p('Time of possession: on the first play of each drive the app asks for the game clock (type it like a microwave, 1, 1, 4, 2 for 11:42, or skip). You can also log the clock any time with the Clock button. Possession time is worked out from those readings and the quarter ends.');
+    p('Under More, "Our team, opponent players & clock" lets you turn off the other team\u2019s player screens entirely, so their plays only ask where the ball ended and which of your players made the tackle.');
     p('If the app and the field ever disagree, tap Set situation and type in what the chain crew has. The plays already entered stay as they are.');
     p('Everything is stored on this phone only. Copy a backup after each game.');
   }
@@ -2871,6 +2962,15 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     b.append(fieldSVG(g, 1, { spot: E.kickSpotFor(E.opp(g.start.receivesFirst), g, 'kickoff'), team: E.opp(g.start.receivesFirst), compact: true }), fieldCaption(g, 1));
   }
 
+  function trackingEditor(b, g) {
+    const S = E.settingsOf(g);
+    b.append(field('Our team', teamSeg(g, S.myTeam || 'home', v => { g.settings.myTeam = v; C.save(); C.recompute(); render(); }, { home: g.teams.home.name, away: g.teams.away.name })));
+    b.append(toggle('Track the other team\u2019s players (names and numbers)', S.trackOpponents !== false, v => { g.settings.trackOpponents = v; C.save(); C.recompute(); render(); }));
+    b.append(h('div', { class: 'help' }, 'Off: the app never asks who their ball carrier, passer, kicker or tackler was. Their team totals (yards, first downs, score) still count from the spots you enter.'));
+    b.append(toggle('Ask for the game clock on the first play of each drive', S.askClock !== false, v => { g.settings.askClock = v; C.save(); }));
+    b.append(field('Quarter length (minutes)', numberInput({ value: S.quarterMinutes || 12, cls: 'yard-input', attrs: { min: 1, max: 20 }, onInput: v => { g.settings.quarterMinutes = E.clamp(E.num(v, 12), 1, 20); C.save(); C.recompute(); } })));
+    b.append(h('div', { class: 'help' }, 'The clock readings and the quarter length give time of possession on the Stats tab. The Clock button on the Game tab logs a reading any time.'));
+  }
   function settingsEditor(b, g) {
     const S = E.settingsOf(g);
     const numF = (label, key) => field(label, numberInput({ value: S[key], cls: 'yard-input', onInput: v => { g.settings[key] = E.num(v, S[key]); C.save(); C.recompute(); } }));
