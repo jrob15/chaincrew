@@ -65,7 +65,7 @@ h2 { font-size: 22px; text-transform: uppercase; letter-spacing: .05em; color: v
 h3 { font-size: 18px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 p { margin: 0; }
 button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; touch-action: manipulation; }
 :focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -158,13 +158,13 @@ button { cursor: pointer; }
 .seg button.on.gold { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
 .seg.tight button { flex: 0 0 auto; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { min-height: 44px; min-width: 52px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; }
+.chip { min-height: 48px; min-width: 56px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; }
 .chip b { font-family: var(--font-display); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .chip span { font-size: 11px; color: var(--muted); max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .chip.on span { color: var(--bg); opacity: .75; }
-.chip.other { flex-direction: row; gap: 4px; }
-.chip.other input { width: 54px; min-height: 34px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); padding: 2px 6px; text-align: center; font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.chip.other { border-style: dashed; color: var(--muted); font-size: 15px; font-weight: 600; min-width: 72px; }
+.chip.other.active { border-style: solid; border-color: var(--accent); color: var(--fg); }
 input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; min-height: 46px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); }
 textarea { min-height: 96px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
 input[type="color"] { width: 54px; height: 46px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
@@ -183,6 +183,25 @@ details.adv { border: 1px solid var(--line); border-radius: var(--radius); paddi
 details.adv summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--muted); }
 details.adv > .stack { padding-bottom: 12px; }
 .help { color: var(--muted); font-size: 14px; }
+
+/* keypad */
+.keypad { flex: 0 0 auto; border-top: 1px solid var(--line); background: var(--surface); padding: 6px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); user-select: none; -webkit-user-select: none; }
+.kp-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 2px 4px 8px; }
+.kp-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kp-readout { font-family: var(--font-display); font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
+.kp-sides { grid-column: 1 / -1; display: flex; gap: 6px; }
+.kp-side { flex: 1 1 auto; min-height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-weight: 600; font-size: 14px; }
+.kp-side.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.kp-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.kp-key { min-height: 46px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1; }
+.kp-key:active { background: var(--fg); color: var(--bg); }
+.kp-key.alt { font-family: var(--font-body); font-size: 15px; font-weight: 700; }
+.kp-key.alt.go { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+.kp-key.bs { font-size: 20px; }
+.kp-key[disabled] { opacity: .3; }
+.numfield { min-width: 88px; min-height: 52px; padding: 4px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font-family: var(--font-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; line-height: 1; }
+.numfield.active { border-color: var(--accent); background: var(--surface); }
+.numfield.sm { min-height: 46px; font-size: 22px; min-width: 72px; }
 
 /* log */
 .qhead { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 14px 0 4px; border-bottom: 1px solid var(--line); }
@@ -303,7 +322,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   ];
 
   const DEFAULT_SETTINGS = {
-    fieldLength: 80, kickoffSpot: 30, touchbackSpot: 15, safetyKickSpot: 15, trySpot: 3,
+    fieldLength: 100, kickoffSpot: 40, touchbackSpot: 20, safetyKickSpot: 20, trySpot: 3,
     ptsTD: 6, ptsFG: 3, ptsKick: 1, pts2pt: 2, ptsSafety: 2,
     firstDownYards: 10, timeoutsPerHalf: 3, quarters: 4,
     sackCountsAsRush: true, kneelCountsAsRush: true
@@ -1211,7 +1230,9 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
-/* Chain Crew UI — core: storage, helpers, field drawing, sheet + form widgets, play forms. */
+/* Chain Crew UI — core: storage, helpers, field drawing, sheet + on-screen keypad, form widgets, play forms.
+   Nothing in a play form opens the phone's keyboard: every number is entered on the app's own keypad,
+   by tapping the field, or with the ±1/±5 steppers, so a form never loses focus mid-entry. */
 (function () {
   'use strict';
   const E = window.Engine;
@@ -1303,6 +1324,12 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   }
 
   /* ---------- field drawing ---------- */
+  function contrastOn(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return '#fff';
+    const n = parseInt(m[1], 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255;
+    return (0.299 * r + 0.587 * gg + 0.114 * b) > 170 ? '#111' : '#fff';
+  }
   // opts: {spot, lineToGain, marker, team (offense for arrow), onPick(abs), compact}
   function fieldSVG(g, quarter, opts) {
     opts = opts || {};
@@ -1316,42 +1343,35 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     svg.setAttribute('aria-label', 'Field view');
     const el = (n, a, txt) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; };
     el('rect', { x: 0, y: 0, width: W, height: H, fill: 'var(--turf)' });
-    // alternating 10-yard bands
     for (let y = 0; y < L; y += 10) {
       if ((y / 10) % 2 === 1) el('rect', { x: Math.min(x(y), x(y + 10)), y: 0, width: Math.abs(x(y + 10) - x(y)), height: H, fill: 'var(--turf-dark)' });
     }
-    // end zones
     const leftTeam = homeLeft ? 'home' : 'away', rightTeam = homeLeft ? 'away' : 'home';
     el('rect', { x: 0, y: 0, width: ez, height: H, fill: g.teams[leftTeam].color || '#444', opacity: .85 });
     el('rect', { x: W - ez, y: 0, width: ez, height: H, fill: g.teams[rightTeam].color || '#444', opacity: .85 });
     const ezt = (tx, team) => { const t = el('text', { x: tx, y: H / 2, fill: contrastOn(g.teams[team].color), 'font-family': 'var(--font-display)', 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', transform: `rotate(-90 ${tx} ${H / 2})`, 'letter-spacing': 2 }, ab(g, team)); t.style.pointerEvents = 'none'; };
     ezt(ez / 2, leftTeam); ezt(W - ez / 2, rightTeam);
-    // yard lines
     for (let y = 0; y <= L; y += 5) {
       const big = y % 10 === 0;
       el('line', { x1: x(y), y1: 0, x2: x(y), y2: H, stroke: 'var(--chalk)', 'stroke-width': big ? 3 : 1.5, opacity: big ? 1 : .6 });
     }
-    // numbers
     for (let y = 10; y < L; y += 10) {
       const n = y <= L / 2 ? y : L - y;
       el('text', { x: x(y), y: H - 14, fill: 'var(--chalk)', 'font-family': 'var(--font-display)', 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle' }, String(n));
       el('text', { x: x(y), y: 34, fill: 'var(--chalk)', 'font-family': 'var(--font-display)', 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', transform: `rotate(180 ${x(y)} 24)` }, String(n));
     }
-    // line to gain
     if (opts.lineToGain != null && Number.isFinite(opts.lineToGain)) el('line', { x1: x(opts.lineToGain), y1: 0, x2: x(opts.lineToGain), y2: H, stroke: 'var(--accent)', 'stroke-width': 5 });
-    // ball (current spot)
     if (opts.spot != null && Number.isFinite(opts.spot)) {
       const bx = x(opts.spot), by = H / 2;
       el('line', { x1: bx, y1: 0, x2: bx, y2: H, stroke: '#1a64ff', 'stroke-width': 4, opacity: .9 });
       el('ellipse', { cx: bx, cy: by, rx: 20, ry: 12, fill: '#8b4a1f', stroke: '#fff', 'stroke-width': 2 });
       el('line', { x1: bx - 7, y1: by, x2: bx + 7, y2: by, stroke: '#fff', 'stroke-width': 2 });
       if (opts.team) {
-        const d = E.dir(opts.team) * (homeLeft ? 1 : -1); // +1 → right on screen
+        const d = E.dir(opts.team) * (homeLeft ? 1 : -1);
         const ax = bx + d * 34;
         el('path', { d: `M ${ax} ${by} l ${-d * 16} -12 v 24 z`, fill: 'var(--accent)' });
       }
     }
-    // picked marker (can be moved in place with svg.setMarker)
     const mLine = el('line', { x1: 0, y1: 0, x2: 0, y2: H, stroke: '#fff', 'stroke-width': 4, 'stroke-dasharray': '10 8', visibility: 'hidden' });
     const mDot = el('circle', { cx: 0, cy: H / 2, r: 15, fill: '#fff', stroke: 'var(--accent)', 'stroke-width': 4, visibility: 'hidden' });
     svg.setMarker = abs => {
@@ -1370,19 +1390,13 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         opts.onPick(abs);
       };
       let down = false;
-      svg.addEventListener('pointerdown', e => { down = true; svg.setPointerCapture && svg.setPointerCapture(e.pointerId); pick(e); });
+      svg.addEventListener('pointerdown', e => { down = true; try { svg.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ } pick(e); });
       svg.addEventListener('pointermove', e => { if (down) pick(e); });
       svg.addEventListener('pointerup', () => { down = false; });
       svg.addEventListener('pointercancel', () => { down = false; });
       svg.style.cursor = 'crosshair';
     }
     return svg;
-  }
-  function contrastOn(hex) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
-    if (!m) return '#fff';
-    const n = parseInt(m[1], 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255;
-    return (0.299 * r + 0.587 * gg + 0.114 * b) > 170 ? '#111' : '#fff';
   }
   function fieldCaption(g, quarter) {
     const homeLeft = E.homeOnLeft(g, quarter);
@@ -1392,6 +1406,105 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       h('span', null, ab(g, homeLeft ? 'away' : 'home') + ' goal ▶'));
   }
 
+  /* ---------- keypad ----------
+     One keypad per sheet, docked above the Cancel/Add buttons. A number field (numField) binds it;
+     digits replace the field's value on the first press and append after that, so "3","4" gives 34
+     and the next digit starts a new number. The phone keyboard is never involved. */
+  const Keypad = {
+    el: null, body: null, head: null, altKey: null, t: null, buf: '', fresh: true, neg: false, lastKey: null,
+    create() { return h('div', { class: 'keypad', hidden: true }); },
+    mount(el, body) {
+      this.el = el; this.body = body; this.t = null; this.lastKey = null;
+      el.replaceChildren();
+      this.head = h('div', { class: 'kp-head' });
+      const keys = h('div', { class: 'kp-keys' });
+      const key = (label, k, cls) => h('button', { type: 'button', class: 'kp-key' + (cls ? ' ' + cls : ''), 'data-k': k, onclick: () => this.press(k) }, label);
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(d => keys.append(key(d, d)));
+      this.altKey = key('', 'alt', 'alt');
+      keys.append(this.altKey, key('0', '0'), key('⌫', 'bs', 'bs'));
+      keys.addEventListener('pointerdown', e => e.preventDefault());
+      el.append(this.head, keys);
+    },
+    unmount() { this.el = null; this.body = null; this.t = null; this.lastKey = null; },
+    bind(t) {
+      if (!this.el) return;
+      if (this.t && this.t.el && this.t.el !== t.el) this.t.el.classList.remove('active');
+      this.t = t; this.lastKey = t.key; this.buf = ''; this.fresh = true; this.neg = t.kind === 'yards' && Number(t.get()) < 0;
+      t.el.classList.add('active');
+      this.el.hidden = false;
+      this.update();
+    },
+    unbind() { if (this.t && this.t.el) this.t.el.classList.remove('active'); this.t = null; if (this.el) this.el.hidden = true; },
+    // after a form rebuilds, re-attach to the same field (by key) or the form's primary field
+    rebind() {
+      if (!this.el || !this.body) return;
+      if (this.t && this.t.el && this.body.contains(this.t.el)) { this.update(); return; }
+      const key = (this.t && this.t.key) || this.lastKey;
+      let el = key ? this.body.querySelector('[data-numkey="' + String(key).replace(/"/g, '') + '"]') : null;
+      if (!el) el = this.body.querySelector('[data-numkey][data-primary]');
+      if (el && el._numTarget) this.bind(el._numTarget); else this.unbind();
+    },
+    // the field's value changed some other way (field tap, stepper, preset): start a fresh entry
+    touched(t) {
+      if (!this.t || !t || this.t.key !== t.key) return;
+      this.buf = ''; this.fresh = true; this.neg = t.kind === 'yards' && Number(t.get()) < 0; this.update();
+    },
+    update() {
+      const t = this.t; if (!t || !this.el) return;
+      this.head.replaceChildren(
+        h('div', { class: 'kp-label' }, t.label || ''),
+        h('div', { class: 'kp-readout num' }, t.kind === 'jersey' ? (this.buf ? '#' + this.buf : 'type a number') : (t.readout ? t.readout() : String(t.get()))),
+        t.sides ? h('div', { class: 'kp-sides' }, ...t.sides.options.map(s => h('button', { type: 'button', class: 'kp-side' + (s.v === t.sides.value() ? ' on' : ''), onclick: () => { t.sides.onChange(s.v); } }, s.l))) : null);
+      const alt = this.altKey;
+      alt.disabled = false; alt.classList.remove('go');
+      if (t.kind === 'yards') alt.textContent = '±';
+      else if (t.kind === 'jersey') { alt.textContent = this.buf ? 'Add #' + this.buf : 'Add'; alt.classList.toggle('go', !!this.buf); alt.disabled = !this.buf; }
+      else if (t.kind === 'yardline') alt.textContent = String(t.mid != null ? t.mid : 50);
+      else { alt.textContent = ''; alt.disabled = true; }
+      if (t.kind === 'jersey') t.el.textContent = this.buf ? '#' + this.buf : (t.placeholder || 'other #');
+      else if (t.el.refresh) t.el.refresh();
+    },
+    press(k) {
+      const t = this.t; if (!t) return;
+      const max = t.max == null ? 999 : t.max;
+      const maxDigits = String(Math.floor(Math.abs(max))).length;
+      if (k === 'bs') {
+        this.buf = this.fresh ? '' : this.buf.slice(0, -1); this.fresh = false;
+        this.apply();
+      } else if (k === 'alt') {
+        if (t.kind === 'yards') { if (this.fresh) { this.buf = String(Math.abs(Number(t.get()) || 0)); this.fresh = false; } this.neg = !this.neg; this.apply(); }
+        else if (t.kind === 'jersey') { const v = this.buf; if (!v) return; this.buf = ''; this.fresh = true; if (t.onDone) t.onDone(v); this.update(); }
+        else if (t.kind === 'yardline') { this.buf = String(t.mid != null ? t.mid : 50); this.fresh = true; this.apply(); }
+      } else {
+        if (this.fresh) { this.buf = k; this.fresh = false; if (t.kind === 'yards') this.neg = false; }
+        else { let nb = this.buf + k; if (nb.length > maxDigits || Number(nb) > max) nb = k; this.buf = nb; }
+        this.apply();
+        if (this.buf.length >= maxDigits) this.fresh = true;
+      }
+    },
+    apply() {
+      const t = this.t; if (!t) return;
+      if (t.kind === 'jersey') { this.update(); return; }
+      let v = Number(this.buf || 0);
+      if (t.kind === 'yards' && this.neg) v = -v;
+      if (t.max != null) v = Math.min(v, t.max);
+      if (t.min != null) v = Math.max(v, t.min);
+      t.set(v);
+      this.update();
+    }
+  };
+  // a tappable number display that the keypad edits
+  // o: {key, primary, kind:'yardline'|'yards'|'int'|'jersey', label, get, set, format, max, min, mid, readout, sides, onDone, placeholder, cls}
+  function numField(o) {
+    const el = h('button', { type: 'button', class: 'numfield' + (o.cls ? ' ' + o.cls : ''), 'data-numkey': o.key, 'data-primary': o.primary ? '' : null, 'aria-label': o.label || '' });
+    const t = Object.assign({ el }, o);
+    el._numTarget = t;
+    el.refresh = () => { if (o.kind !== 'jersey') el.textContent = o.format ? o.format(o.get()) : String(o.get()); };
+    if (o.kind === 'jersey') el.textContent = o.placeholder || 'other #'; else el.refresh();
+    el.addEventListener('click', () => Keypad.bind(t));
+    return el;
+  }
+
   /* ---------- sheet ---------- */
   let sheetState = null;
   function openSheet(o) {
@@ -1399,6 +1512,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const bg = h('div', { class: 'sheet-bg', onclick: () => { if (!o.modal) closeSheet(); } });
     const body = h('div', { class: 'sheet-body' });
     const err = h('div', { class: 'err hide' });
+    const pad = Keypad.create();
     const foot = h('div', { class: 'sheet-foot' });
     if (o.onSave) {
       foot.append(h('button', { class: 'btn ghost', type: 'button', onclick: closeSheet }, 'Cancel'));
@@ -1410,21 +1524,22 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     } else foot.append(h('button', { class: 'btn ghost', type: 'button', onclick: closeSheet }, 'Close'));
     const sheet = h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true' },
       h('div', { class: 'sheet-head' }, h('div', null, h('h2', null, o.title), o.ctx ? h('div', { class: 'ctx' }, o.ctx) : null), h('button', { class: 'btn sm ghost', type: 'button', onclick: closeSheet }, '✕')),
-      body, foot);
+      body, pad, foot);
     document.body.append(bg, sheet);
-    sheetState = { bg, sheet, body, err };
+    sheetState = { bg, sheet, body, err, pad };
+    Keypad.mount(pad, body);
     o.build(body, { close: closeSheet, error: m => { err.textContent = m; err.classList.remove('hide'); body.prepend(err); } });
+    Keypad.rebind();
     return sheetState;
   }
-  function closeSheet() { if (!sheetState) return; sheetState.bg.remove(); sheetState.sheet.remove(); sheetState = null; }
+  function closeSheet() { if (!sheetState) return; Keypad.unmount(); sheetState.bg.remove(); sheetState.sheet.remove(); sheetState = null; }
 
   /* ---------- widgets ---------- */
   function seg(o) { // {options:[{v,l,cls}], value, onChange, tight}
     const wrap = h('div', { class: 'seg' + (o.tight ? ' tight' : '') });
-    o.options.forEach(opt => {
-      const b = h('button', { type: 'button', class: (opt.v === o.value ? 'on ' : '') + (opt.cls || ''), onclick: () => { o.onChange(opt.v); } }, opt.l);
-      wrap.append(b);
-    });
+    const btns = o.options.map(opt => h('button', { type: 'button', class: (opt.v === o.value ? 'on ' : '') + (opt.cls || ''), onclick: () => { o.onChange(opt.v); } }, opt.l));
+    wrap.append(...btns);
+    wrap.setValue = v => btns.forEach((b, i) => b.classList.toggle('on', o.options[i].v === v));
     return wrap;
   }
   function field(label, ...kids) { return h('div', { class: 'fld' }, h('label', null, label), ...kids); }
@@ -1432,14 +1547,15 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const inp = h('input', { type: 'checkbox', checked, onchange: e => onChange(e.target.checked) });
     return h('label', { class: 'toggle' }, inp, h('span', null, label));
   }
-  function numberInput(o) { // {value, onInput, placeholder, cls, step}
+  // plain number input: settings screens only (never inside a play form)
+  function numberInput(o) {
     return h('input', Object.assign({ type: 'number', inputmode: 'decimal', step: o.step || 'any', class: o.cls || '', placeholder: o.placeholder || '', value: o.value == null ? '' : o.value, oninput: e => o.onInput(e.target.value) }, o.attrs || {}));
   }
   function teamSeg(g, value, onChange, labels) {
     return seg({ options: [{ v: 'home', l: (labels && labels.home) || ab(g, 'home') }, { v: 'away', l: (labels && labels.away) || ab(g, 'away') }], value, onChange });
   }
 
-  // player picker: single (ev[key] = num string) or multi (ev[key] = [nums])
+  // player picker: single (ev[key] = num string) or multi (ev[key] = [nums]); "other #" goes through the keypad
   function playerPicker(g, team, ev, key, o) {
     o = o || {};
     const wrap = h('div', { class: 'fld' });
@@ -1449,91 +1565,77 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const cur = () => isMulti ? (Array.isArray(ev[key]) ? ev[key] : []) : ev[key];
     const sel = n => isMulti ? cur().map(String).includes(String(n)) : String(cur()) === String(n);
     const nums = roster(g, team).map(p => String(p.num));
-    const extra = [];
-    const curVals = isMulti ? cur().map(String) : (cur() != null && cur() !== '' ? [String(cur())] : []);
-    curVals.forEach(n => { if (!nums.includes(n)) extra.push(n); });
     const choose = n => {
+      n = String(n).replace(/^0+(?=\d)/, '');
       if (isMulti) {
         let a = cur().map(String);
-        if (a.includes(String(n))) a = a.filter(x => x !== String(n));
-        else { a.push(String(n)); if (o.max && a.length > o.max) a.shift(); }
+        if (a.includes(n)) a = a.filter(x => x !== n);
+        else { a.push(n); if (o.max && a.length > o.max) a.shift(); }
         ev[key] = a;
-      } else ev[key] = sel(n) ? '' : String(n);
+      } else ev[key] = sel(n) ? '' : n;
       if (!isMulti && ev[key]) UI.lastPlayer[team + ':' + key] = ev[key];
       rebuild(); if (o.onChange) o.onChange();
     };
-    const other = h('input', { type: 'number', inputmode: 'numeric', placeholder: '#', 'aria-label': 'Other jersey number' });
-    const otherChip = h('div', { class: 'chip other' }, h('span', { style: 'font-size:13px' }, 'other'), other);
-    other.addEventListener('change', () => { const v = other.value.trim(); if (v !== '') { choose(v); other.value = ''; } });
-    other.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); other.dispatchEvent(new Event('change')); } });
+    const other = numField({ key: team + ':' + key + ':other', kind: 'jersey', label: 'Other ' + ab(g, team) + ' jersey number', max: 99, cls: 'chip other', placeholder: 'other #', get: () => '', set: () => {}, onDone: choose });
     function rebuild() {
       chips.replaceChildren();
       if (o.allowNone !== false && !isMulti) chips.append(h('button', { type: 'button', class: 'chip' + (!cur() ? ' on' : ''), onclick: () => { ev[key] = ''; rebuild(); if (o.onChange) o.onChange(); } }, h('b', null, '—'), h('span', null, 'none')));
       roster(g, team).forEach(p => chips.append(h('button', { type: 'button', class: 'chip' + (sel(p.num) ? ' on' : ''), onclick: () => choose(p.num) }, h('b', null, '#' + p.num), h('span', null, p.name || p.pos || ' '))));
       const vals = isMulti ? cur().map(String) : (cur() != null && cur() !== '' ? [String(cur())] : []);
       vals.forEach(n => { if (!nums.includes(n)) chips.append(h('button', { type: 'button', class: 'chip on', onclick: () => choose(n) }, h('b', null, '#' + n), h('span', null, 'added'))); });
-      chips.append(otherChip);
+      chips.append(other);
     }
     rebuild();
     wrap.append(lbl, chips);
     return wrap;
   }
 
-  // spot picker: writes ev[kMode] ('spot'|'yards'), ev[kSpot] (abs), ev[kYards]
+  // spot picker: writes ev[kMode] ('spot'|'yards'), ev[kSpot] (absolute yard), ev[kYards]
   function spotPicker(g, o) {
-    // o: {ev, kMode, kSpot, kYards, team, start, label, deltaLabel(yds), onChange, quarter, lineToGain, field, allowYards}
+    // o: {ev, kMode, kSpot, kYards, key, primary, team, start, defaultSpot, label, deltaLabel, yardsLabel, onChange, quarter, lineToGain, field, allowYards}
     const ev = o.ev, L = E.settingsOf(g).fieldLength, team = o.team, start = o.start;
     const kMode = o.kMode || 'mode', kSpot = o.kSpot || 'endSpot', kYards = o.kYards || 'yards';
+    const key = o.key || kSpot;
     if (!ev[kMode]) ev[kMode] = 'spot';
     if (ev[kMode] === 'spot' && (ev[kSpot] == null || ev[kSpot] === '')) ev[kSpot] = o.defaultSpot != null ? o.defaultSpot : start;
     if (ev[kMode] === 'yards' && (ev[kYards] == null || ev[kYards] === '')) ev[kYards] = 0;
     const dl = o.deltaLabel || (y => y > 0 ? 'Gain of ' + E.fmtYard(y) : y < 0 ? 'Loss of ' + E.fmtYard(-y) : 'No gain');
     const abs = () => ev[kMode] === 'yards' ? E.clamp(start + E.num(ev[kYards], 0) * E.dir(team), 0, L) : E.clamp(E.num(ev[kSpot], start), 0, L);
     const yds = () => ev[kMode] === 'yards' ? E.num(ev[kYards], 0) : E.gain(team, start, E.num(ev[kSpot], start));
+    const curSide = () => { const q = E.spotParts(abs(), L); return q.side === 'mid' ? E.opp(team) : q.side; };
+    const curYard = () => E.spotParts(abs(), L).yard;
+    const readoutText = () => { const d = dl(yds()); return E.fmtSpot(abs(), g) + (d ? ' · ' + d : ''); };
+    const sideOptions = [{ v: 'home', l: ab(g, 'home') + (team === 'home' ? ' (own)' : '') }, { v: 'away', l: ab(g, 'away') + (team === 'away' ? ' (own)' : '') }];
     const readout = h('div', { class: 'readout num' });
     const controls = h('div', { class: 'stack' });
-    let fieldEl = null;
     const wrap = h('div', { class: 'spot' }, h('div', { class: 'row' }, h('span', { class: 'lbl grow' }, o.label || 'Ball spotted at'), readout), controls);
-    function refresh() {
-      const y = yds();
-      readout.replaceChildren(h('span', null, E.fmtSpot(abs(), g)), h('span', { class: 'muted' }, ' · '), h('span', { class: 'delta' + (y < 0 ? ' neg' : '') }, dl(y)));
+    let fieldEl = null, numBtn = null, sideSeg = null;
+    function refresh(external) {
+      const y = yds(), d = dl(y);
+      readout.replaceChildren(h('span', null, E.fmtSpot(abs(), g)), ...(d ? [h('span', { class: 'muted' }, ' · '), h('span', { class: 'delta' + (y < 0 ? ' neg' : '') }, d)] : []));
+      if (numBtn) numBtn.refresh();
+      if (sideSeg) sideSeg.setValue(curSide());
       if (fieldEl) fieldEl.setMarker(abs());
+      if (external && numBtn) Keypad.touched(numBtn._numTarget);
       if (o.onChange) o.onChange();
     }
-    let building = false;
-    function pickAbs(a) {
-      ev[kSpot] = a;
-      if (ev[kMode] !== 'spot') { ev[kMode] = 'spot'; build(); return; }
-      const p = E.spotParts(a, L);
-      const yardIn = controls.querySelector('input.yard-input');
-      const sideBtns = controls.querySelectorAll('.seg.side button');
-      if (yardIn) yardIn.value = E.fmtYard(p.yard);
-      if (sideBtns.length === 2) { const side = p.side === 'mid' ? 'home' : p.side; sideBtns[0].classList.toggle('on', side === 'home'); sideBtns[1].classList.toggle('on', side === 'away'); }
-      refresh();
-    }
+    function setSide(v) { ev[kSpot] = E.absFrom(v, curYard(), L); refresh(true); }
+    function pickAbs(a) { ev[kSpot] = a; if (ev[kMode] !== 'spot') { ev[kMode] = 'spot'; build(); } refresh(true); }
     function build() {
-      controls.replaceChildren();
-      if (o.allowYards !== false) controls.append(seg({ options: [{ v: 'spot', l: 'Yard line' }, { v: 'yards', l: o.yardsLabel || 'Yards gained' }], value: ev[kMode], onChange: v => {
-        if (v === 'yards') ev[kYards] = yds(); else ev[kSpot] = abs();
-        ev[kMode] = v; build();
-      } }));
+      controls.replaceChildren(); numBtn = null; sideSeg = null; fieldEl = null;
+      if (o.allowYards !== false) controls.append(seg({ options: [{ v: 'spot', l: 'Yard line' }, { v: 'yards', l: o.yardsLabel || 'Yards gained' }], value: ev[kMode], onChange: v => { if (v === ev[kMode]) return; if (v === 'yards') ev[kYards] = yds(); else ev[kSpot] = abs(); ev[kMode] = v; build(); refresh(true); } }));
       if (ev[kMode] === 'spot') {
-        const p = E.spotParts(abs(), L);
-        const curSide = () => { const q = E.spotParts(abs(), L); return q.side === 'mid' ? 'home' : q.side; };
-        const curYard = () => E.spotParts(abs(), L).yard;
-        const yardIn = numberInput({ value: E.fmtYard(p.yard), cls: 'yard-input', attrs: { min: 0, max: L / 2, 'aria-label': 'Yard line' }, onInput: v => { const yard = E.clamp(E.num(v, 0), 0, L / 2); ev[kSpot] = E.absFrom(curSide(), yard, L); refresh(); } });
-        const sideSeg = seg({ options: [{ v: 'home', l: ab(g, 'home') + (team === 'home' ? ' (own)' : '') }, { v: 'away', l: ab(g, 'away') + (team === 'away' ? ' (own)' : '') }], value: curSide(), onChange: v => { ev[kSpot] = E.absFrom(v, curYard(), L); build(); } });
-        sideSeg.classList.add('side');
-        const mid = h('button', { type: 'button', class: 'btn sm ghost', onclick: () => { ev[kSpot] = L / 2; build(); } }, String(L / 2));
-        const stepRow = h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { ev[kSpot] = E.clamp(abs() + n * E.dir(team), 0, L); build(); } }, (n > 0 ? '+' : '') + n)));
-        controls.append(h('div', { class: 'row' }, h('div', { class: 'grow' }, sideSeg), yardIn, mid), stepRow);
+        sideSeg = seg({ options: sideOptions, value: curSide(), onChange: setSide });
+        numBtn = numField({ key, primary: o.primary, kind: 'yardline', label: o.label || 'Ball spotted at', max: L / 2, mid: L / 2, get: curYard, format: E.fmtYard, set: y => { ev[kSpot] = E.absFrom(curSide(), E.clamp(y, 0, L / 2), L); refresh(false); }, readout: readoutText, sides: { options: sideOptions, value: curSide, onChange: setSide } });
+        const stepRow = h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { ev[kSpot] = E.clamp(abs() + n * E.dir(team), 0, L); refresh(true); } }, (n > 0 ? '+' : '') + n)));
+        controls.append(h('div', { class: 'row' }, h('div', { class: 'grow' }, sideSeg), numBtn), stepRow);
       } else {
-        const yIn = numberInput({ value: ev[kYards], cls: 'yard-input', attrs: { 'aria-label': 'Yards' }, onInput: v => { ev[kYards] = E.num(v, 0); refresh(); } });
-        const quick = h('div', { class: 'steppers' }, ...[-5, -2, 2, 5, 10].map(n => h('button', { type: 'button', onclick: () => { ev[kYards] = E.num(ev[kYards], 0) + n; build(); } }, (n > 0 ? '+' : '') + n)));
-        controls.append(h('div', { class: 'row' }, h('span', { class: 'muted grow' }, 'Yards (negative for a loss)'), yIn), quick);
+        numBtn = numField({ key, primary: o.primary, kind: 'yards', label: o.yardsLabel || 'Yards gained', max: 99, get: () => E.num(ev[kYards], 0), format: v => (v > 0 ? '+' : '') + E.fmtYard(v), set: v => { ev[kYards] = v; refresh(false); }, readout: readoutText });
+        const quick = h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { ev[kYards] = E.num(ev[kYards], 0) + n; refresh(true); } }, (n > 0 ? '+' : '') + n)));
+        controls.append(h('div', { class: 'row' }, h('span', { class: 'muted grow small' }, '± on the keypad makes it a loss'), numBtn), quick);
       }
-      if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: start, lineToGain: o.lineToGain, marker: abs(), team, onPick: pickAbs, compact: true }); controls.append(h('div', null, fieldEl, h('div', { class: 'small muted' }, 'Tap or drag on the field to place the ball'))); }
-      refresh();
+      if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: start, lineToGain: o.lineToGain, marker: abs(), team, onPick: pickAbs, compact: true }); controls.append(h('div', null, fieldEl, h('div', { class: 'small muted' }, 'Or tap the field, then fine-tune with −1 / +1'))); }
+      refresh(false);
     }
     build();
     return wrap;
@@ -1550,10 +1652,10 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       wrap.append(field('Recovered by', teamSeg(g, f.recTeam, v => { f.recTeam = v; f.recBy = ''; f.td = false; build(); if (o.onChange) o.onChange(); }, { home: ab(g, 'home') + (o.team === 'home' ? ' (offense)' : ' (defense)'), away: ab(g, 'away') + (o.team === 'away' ? ' (offense)' : ' (defense)') })));
       wrap.append(playerPicker(g, f.recTeam, f, 'recBy', { label: 'Recovering player', onChange: o.onChange }));
       const fs = o.start();
-      wrap.append(spotPicker(g, { ev: f, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: f.recTeam, start: fs, defaultSpot: fs, label: 'Recovered at', quarter: o.quarter, allowYards: false, onChange: o.onChange }));
+      wrap.append(spotPicker(g, { ev: f, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', key: 'fumbleRec', team: f.recTeam, start: fs, defaultSpot: fs, label: 'Recovered at', quarter: o.quarter, allowYards: false, onChange: o.onChange }));
       if (f.recTeam !== o.team) {
         wrap.append(toggle('Returned for a touchdown', !!f.td, v => { f.td = v; build(); if (o.onChange) o.onChange(); }));
-        if (!f.td) wrap.append(spotPicker(g, { ev: f, kMode: 'retMode', kSpot: 'retSpot', kYards: 'retYards', team: f.recTeam, start: E.num(f.recSpot, fs), defaultSpot: E.num(f.recSpot, fs), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), quarter: o.quarter, allowYards: false, onChange: o.onChange }));
+        if (!f.td) wrap.append(spotPicker(g, { ev: f, kMode: 'retMode', kSpot: 'retSpot', kYards: 'retYards', key: 'fumbleRet', team: f.recTeam, start: E.num(f.recSpot, fs), defaultSpot: E.num(f.recSpot, fs), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), quarter: o.quarter, allowYards: false, onChange: o.onChange }));
       }
     }
     build();
@@ -1572,12 +1674,13 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         box.children[1].textContent = E.dd(d.after, g) + (d.after.score.home !== ctx.state.score.home || d.after.score.away !== ctx.state.score.away ? '  ·  ' + ab(g, 'home') + ' ' + d.after.score.home + ' – ' + ab(g, 'away') + ' ' + d.after.score.away : '');
         box.children[2].textContent = d.text + (d.flags.halfDistance ? ' · half the distance applied' : '') + (d.flags.error ? ' · ' + d.flags.error : '');
       } catch (e) { box.children[2].textContent = String(e); }
+      Keypad.rebind();
     };
     box.refresh();
     return box;
   }
 
-  function optionsBlock(ev, onChange) {
+  function optionsBlock(ev) {
     return h('details', { class: 'adv' }, h('summary', null, 'Clock & note'), h('div', { class: 'stack' },
       field('Game clock (optional)', h('input', { type: 'text', inputmode: 'numeric', placeholder: '11:42', value: ev.clock || '', oninput: e => { ev.clock = e.target.value; } })),
       field('Note (optional)', h('input', { type: 'text', value: ev.note || '', oninput: e => { ev.note = e.target.value; } }))));
@@ -1585,17 +1688,19 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   function offenseSeg(g, ev, onChange) {
     return field('Offense', teamSeg(g, ev.team, v => { ev.team = v; onChange(); }));
   }
+  function intField(o) { // small keypad-driven number for penalties, scores, distances
+    return numField(Object.assign({ kind: 'int', cls: 'sm', max: 99 }, o));
+  }
 
   /* ---------- play forms ----------
-     Each form: (g, ctx, ev) → builds into body; ctx = {state, index (edit) or insertAt, quarter}
-     ev is the draft event (mutated in place). */
+     Each form: (g, ctx, ev, body); ctx = {state, index, quarter}; ev is the draft event (mutated in place). */
   const forms = {};
 
   forms.rush = function (g, ctx, ev, body) {
     const st = ctx.state;
     if (!ev.team) ev.team = st.possession || 'home';
     if (!ev.result) ev.result = 'tackled';
-    if (!ev.carrier && ev.carrier !== '') ev.carrier = '';
+    if (ev.carrier == null) ev.carrier = '';
     const pv = previewBox(g, ctx, ev);
     const rr = () => pv.refresh();
     function build() {
@@ -1603,10 +1708,10 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       body.replaceChildren();
       if (st.phase !== 'play' || st.possession !== team) body.append(offenseSeg(g, ev, build));
       body.append(playerPicker(g, team, ev, 'carrier', { label: ev.kneel ? 'Kneeling player' : 'Ball carrier', onChange: rr }));
-      if (!ev.kneel) body.append(field('Result', seg({ options: [{ v: 'tackled', l: 'Tackled' }, { v: 'oob', l: 'Out of bounds' }, { v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], value: ev.result, onChange: v => { ev.result = v; build(); } })));
-      if (ev.result !== 'td' && ev.result !== 'safety') body.append(spotPicker(g, { ev, team, start: st.spot, label: ev.result === 'fumble' ? 'Fumbled at' : 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
+      if (ev.result !== 'td' && ev.result !== 'safety') body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: ev.result === 'fumble' ? 'Fumbled at' : 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
       if (ev.result === 'fumble') body.append(fumbleSection(g, ev, 'fumble', { team, start: () => (ev.mode === 'yards' ? st.spot + E.num(ev.yards, 0) * E.dir(team) : E.num(ev.endSpot, st.spot)), quarter: ctx.quarter, onChange: rr }));
       if (ev.result !== 'td' && !ev.kneel) body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Tackle by', hint: 'up to 2 — two means both get an assist', multi: true, max: 2, onChange: rr }));
+      if (!ev.kneel) body.append(field('Result', seg({ options: [{ v: 'tackled', l: 'Tackled' }, { v: 'oob', l: 'Out of bounds' }, { v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], value: ev.result, onChange: v => { ev.result = v; build(); } })));
       body.append(pv, optionsBlock(ev));
       rr();
     }
@@ -1630,10 +1735,10 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         body.append(playerPicker(g, team, ev, 'receiver', { label: 'Receiver', onChange: rr }));
         body.append(toggle('Touchdown', !!ev.td, v => { ev.td = v; build(); }));
         if (!ev.td) {
-          body.append(spotPicker(g, { ev, team, start: st.spot, label: 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
+          body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
+          body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Tackle by', hint: 'up to 2', multi: true, max: 2, onChange: rr }));
           body.append(toggle('Fumbled after the catch', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({}, ev.fumble || {}, { on: v }); build(); }));
           if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team, start: () => (ev.mode === 'yards' ? st.spot + E.num(ev.yards, 0) * E.dir(team) : E.num(ev.endSpot, st.spot)), quarter: ctx.quarter, onChange: rr }));
-          else body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Tackle by', hint: 'up to 2', multi: true, max: 2, onChange: rr }));
         }
       } else if (ev.result === 'incomplete') {
         body.append(playerPicker(g, team, ev, 'receiver', { label: 'Intended for', hint: 'optional', onChange: rr }));
@@ -1641,7 +1746,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         body.append(toggle('Spike (clock stop)', !!ev.spike, v => { ev.spike = v; build(); }));
       } else if (ev.result === 'intercepted') {
         body.append(playerPicker(g, def, ev, 'interceptor', { label: 'Intercepted by', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'intSpotMode', kSpot: 'intSpot', kYards: 'intSpotYards', team, start: st.spot, defaultSpot: st.spot, label: 'Intercepted at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds downfield' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, allowYards: false, onChange: rr }));
+        body.append(spotPicker(g, { ev, kMode: 'intSpotMode', kSpot: 'intSpot', kYards: 'intSpotYards', team, start: st.spot, defaultSpot: st.spot, primary: true, label: 'Intercepted at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds downfield' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, allowYards: false, onChange: rr }));
         body.append(toggle('Touchback (caught in the end zone, not returned)', !!ev.intTouchback, v => { ev.intTouchback = v; build(); }));
         if (!ev.intTouchback) {
           body.append(toggle('Returned for a touchdown', !!ev.intTd, v => { ev.intTd = v; build(); }));
@@ -1649,7 +1754,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         }
       } else if (ev.result === 'sack') {
         body.append(toggle('Safety (sacked in his own end zone)', !!ev.safety, v => { ev.safety = v; build(); }));
-        if (!ev.safety) body.append(spotPicker(g, { ev, team, start: st.spot, label: 'Sacked at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
+        if (!ev.safety) body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: 'Sacked at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
         body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Sack by', hint: 'two players split the sack', multi: true, max: 2, onChange: rr }));
         if (!ev.safety) {
           body.append(toggle('Fumbled on the sack', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({}, ev.fumble || {}, { on: v }); build(); }));
@@ -1680,18 +1785,18 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         if (!ev.recTeam) ev.recTeam = Rt;
         body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
         body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: st.spot, defaultSpot: st.spot, label: 'Recovered at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds past the line' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true, allowYards: false, onChange: rr }));
+        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: st.spot, defaultSpot: st.spot, primary: true, label: 'Recovered at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds past the line' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true, allowYards: false, onChange: rr }));
         if (ev.recTeam === Rt) body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; rr(); }));
       } else {
-        if (ev.result !== 'touchback') body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'puntTo', kYards: 'puntYards', team: K, start: st.spot, defaultSpot: E.clamp(st.spot + 35 * E.dir(K), 0, L), label: ev.result === 'return' || ev.result === 'muff' ? 'Caught / landed at' : (ev.result === 'fair_catch' ? 'Fair caught at' : 'Dead at'), deltaLabel: y => 'Punt of ' + E.fmtYard(y), yardsLabel: 'Punt distance', quarter: ctx.quarter, field: true, onChange: rr }));
+        if (ev.result !== 'touchback') body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'puntTo', kYards: 'puntYards', team: K, start: st.spot, defaultSpot: E.clamp(st.spot + 35 * E.dir(K), 0, L), primary: true, label: ev.result === 'return' || ev.result === 'muff' ? 'Caught / landed at' : (ev.result === 'fair_catch' ? 'Fair caught at' : 'Dead at'), deltaLabel: y => 'Punt of ' + E.fmtYard(y), yardsLabel: 'Punt distance', quarter: ctx.quarter, field: true, onChange: rr }));
+        const landing = () => ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.puntYards, 0) * E.dir(K), 0, L) : E.num(ev.puntTo, st.spot);
         if (ev.result === 'return') {
           body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Returner', onChange: rr }));
           body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; build(); }));
           if (!ev.td) {
-            const landing = ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.puntYards, 0) * E.dir(K), 0, L) : E.num(ev.puntTo, st.spot);
-            body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing, defaultSpot: landing, label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
+            body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing(), defaultSpot: landing(), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
             body.append(toggle('Fumbled on the return', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v }); build(); }));
-            if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing)), quarter: ctx.quarter, onChange: rr }));
+            if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing() + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing())), quarter: ctx.quarter, onChange: rr }));
           }
         } else if (ev.result === 'fair_catch') {
           body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Caught by', hint: 'optional', onChange: rr }));
@@ -1700,8 +1805,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Muffed by', hint: 'optional', onChange: rr }));
           body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
           body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-          const landing = ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.puntYards, 0) * E.dir(K), 0, L) : E.num(ev.puntTo, st.spot);
-          body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing, defaultSpot: landing, label: 'Recovered at', deltaLabel: y => y === 0 ? 'at the spot of the muff' : (y > 0 ? E.fmtYard(y) + ' yds past the muff' : E.fmtYard(-y) + ' yds back'), quarter: ctx.quarter, allowYards: false, onChange: rr }));
+          body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing(), defaultSpot: landing(), label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
         }
       }
       body.append(pv, optionsBlock(ev));
@@ -1718,42 +1822,39 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const pv = previewBox(g, ctx, ev);
     const rr = () => pv.refresh();
     const isFree = st.phase === 'free_kick';
-    let fromReady = false;
     function build() {
-      fromReady = false;
       const K = ev.team, Rt = E.opp(K);
-      const from = ev.fromSpot != null && ev.fromSpot !== '' ? E.num(ev.fromSpot, st.spot) : ((st.phase === 'kickoff' || st.phase === 'free_kick') && st.kickTeam === K ? st.spot : E.kickSpotFor(K, g, isFree ? 'safety' : 'kickoff'));
+      const from = () => ev.fromSpot != null && ev.fromSpot !== '' ? E.num(ev.fromSpot, st.spot) : ((st.phase === 'kickoff' || st.phase === 'free_kick') && st.kickTeam === K ? st.spot : E.kickSpotFor(K, g, isFree ? 'safety' : 'kickoff'));
       body.replaceChildren();
       body.append(field('Kicking team', teamSeg(g, K, v => { ev.team = v; ev.fromSpot = ''; build(); })));
       body.append(playerPicker(g, K, ev, 'kicker', { label: 'Kicker', onChange: rr }));
-      const fromDetails = h('details', { class: 'adv', open: ev.fromSpot != null && ev.fromSpot !== '' && E.num(ev.fromSpot, from) !== st.spot }, h('summary', null, 'Kicking from the ' + E.fmtSpot(from, g)), h('div', { class: 'stack' }, spotPicker(g, { ev, kMode: 'fromMode', kSpot: 'fromSpot', kYards: 'fromYards', team: K, start: from, defaultSpot: from, label: 'Kick from', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: () => { if (fromReady) { build(); $('details.adv', body).open = true; } } })));
-      body.append(fromDetails);
+      const fromSummary = h('summary', null, 'Kicking from the ' + E.fmtSpot(from(), g));
+      body.append(h('details', { class: 'adv', open: ev.fromSpot != null && ev.fromSpot !== '' && E.num(ev.fromSpot, from()) !== st.spot }, fromSummary, h('div', { class: 'stack' }, spotPicker(g, { ev, kMode: 'fromMode', kSpot: 'fromSpot', kYards: 'fromYards', team: K, start: from(), defaultSpot: from(), label: 'Kick from', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: () => { fromSummary.textContent = 'Kicking from the ' + E.fmtSpot(from(), g); rr(); } }))));
       body.append(field('Result', seg({ options: [{ v: 'return', l: 'Returned' }, { v: 'touchback', l: 'Touchback' }, { v: 'fair_catch', l: 'Fair catch' }, { v: 'oob', l: 'Out of bounds' }, { v: 'onside', l: 'Onside' }, { v: 'muff', l: 'Muffed' }], value: ev.result, onChange: v => { ev.result = v; ev.td = false; build(); } })));
+      const landing = () => ev.mode === 'yards' ? E.clamp(from() + E.num(ev.kickYards, 0) * E.dir(K), 0, L) : E.num(ev.kickTo, from());
       if (ev.result !== 'touchback') {
-        const defLanding = ev.result === 'onside' ? E.clamp(from + 10 * E.dir(K), 0, L) : E.clamp(E.goal(K, L) - 5 * E.dir(K), 0, L);
-        body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'kickTo', kYards: 'kickYards', team: K, start: from, defaultSpot: defLanding, label: ev.result === 'oob' ? 'Went out at' : 'Caught / landed at', deltaLabel: y => 'Kick of ' + E.fmtYard(y), yardsLabel: 'Kick distance', quarter: ctx.quarter, field: true, onChange: rr }));
+        const defLanding = ev.result === 'onside' ? E.clamp(from() + 10 * E.dir(K), 0, L) : E.clamp(E.goal(K, L) - 5 * E.dir(K), 0, L);
+        body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'kickTo', kYards: 'kickYards', team: K, start: from(), defaultSpot: defLanding, primary: true, label: ev.result === 'oob' ? 'Went out at' : 'Caught / landed at', deltaLabel: y => 'Kick of ' + E.fmtYard(y), yardsLabel: 'Kick distance', quarter: ctx.quarter, field: true, onChange: rr }));
       }
-      const landing = ev.mode === 'yards' ? E.clamp(from + E.num(ev.kickYards, 0) * E.dir(K), 0, L) : E.num(ev.kickTo, from);
       if (ev.result === 'return') {
         body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Returner', onChange: rr }));
         body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; build(); }));
         if (!ev.td) {
-          body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing, defaultSpot: landing, label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
+          body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing(), defaultSpot: landing(), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
           body.append(toggle('Fumbled on the return', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v }); build(); }));
-          if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing)), quarter: ctx.quarter, onChange: rr }));
+          if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing() + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing())), quarter: ctx.quarter, onChange: rr }));
         }
       } else if (ev.result === 'oob') {
-        body.append(spotPicker(g, { ev, kMode: 'oobMode', kSpot: 'oobSpot', kYards: 'oobYards', team: Rt, start: landing, defaultSpot: landing, label: ab(g, Rt) + ' takes over at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-        body.append(h('div', { class: 'help' }, 'Enter wherever the officials place the ball (for example 25 yards past the kick spot, or where it went out).'));
+        body.append(spotPicker(g, { ev, kMode: 'oobMode', kSpot: 'oobSpot', kYards: 'oobYards', team: Rt, start: landing(), defaultSpot: landing(), label: ab(g, Rt) + ' takes over at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
+        body.append(h('div', { class: 'help' }, 'Enter wherever the officials place the ball.'));
       } else if (ev.result === 'onside' || ev.result === 'muff') {
         if (!ev.recTeam) ev.recTeam = K;
         body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
         body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing, defaultSpot: landing, label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
+        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing(), defaultSpot: landing(), label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
       }
       body.append(pv, optionsBlock(ev));
       rr();
-      fromReady = true;
     }
     build();
   };
@@ -1771,7 +1872,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       body.replaceChildren();
       if (st.phase !== 'play' || st.possession !== K) body.append(offenseSeg(g, ev, build));
       body.append(playerPicker(g, K, ev, 'kicker', { label: 'Kicker', onChange: rr }));
-      body.append(field('Distance (yards)', h('div', { class: 'row' }, numberInput({ value: ev.distance != null && ev.distance !== '' ? ev.distance : autoDist, cls: 'yard-input', onInput: v => { ev.distance = v === '' ? '' : E.num(v, autoDist); rr(); } }), h('span', { class: 'muted small' }, 'from the ' + E.fmtSpot(st.spot, g) + ' (' + E.fmtYard(E.toGoal(K, st.spot, L)) + ' to the goal + 17)'))));
+      body.append(field('Distance (yards)', h('div', { class: 'row' }, intField({ key: 'fgDistance', primary: true, label: 'Field goal distance', get: () => (ev.distance != null && ev.distance !== '' ? E.num(ev.distance, autoDist) : autoDist), set: v => { ev.distance = v; rr(); } }), h('span', { class: 'muted small' }, 'from the ' + E.fmtSpot(st.spot, g) + ': ' + E.fmtYard(E.toGoal(K, st.spot, L)) + ' to the goal + 17'))));
       body.append(field('Result', seg({ options: [{ v: 'good', l: 'Good', cls: 'gold' }, { v: 'no_good', l: 'No good' }, { v: 'blocked', l: 'Blocked' }], value: ev.result, onChange: v => { ev.result = v; build(); } })));
       if (ev.result === 'no_good') {
         if (!ev.missResult) ev.missResult = 'touchback';
@@ -1816,7 +1917,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   };
 
   forms.penalty = function (g, ctx, ev, body) {
-    const st = ctx.state, L = E.settingsOf(g).fieldLength;
+    const st = ctx.state;
     const off = st.possession || 'home', def = E.opp(off);
     if (!ev.against) ev.against = def;
     if (ev.yards == null) ev.yards = 5;
@@ -1840,9 +1941,9 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       body.append(field('Foul', presets));
       body.append(field('Name', h('input', { type: 'text', value: ev.name || '', placeholder: 'Foul', oninput: e => { ev.name = e.target.value; rr(); } })));
       body.append(field('Against', teamSeg(g, ev.against, v => { ev.against = v; ev.player = ''; build(); }, { home: ab(g, 'home') + (off === 'home' && st.phase === 'play' ? ' (offense)' : (st.phase === 'play' ? ' (defense)' : '')), away: ab(g, 'away') + (off === 'away' && st.phase === 'play' ? ' (offense)' : (st.phase === 'play' ? ' (defense)' : '')) })));
-      const yardOpts = [5, 10, 15].map(n => ({ v: n, l: n + ' yds' }));
-      const isStd = [5, 10, 15].includes(E.num(ev.yards, 0));
-      body.append(field('Yards', h('div', { class: 'row' }, h('div', { class: 'grow' }, seg({ options: yardOpts, value: isStd ? E.num(ev.yards, 0) : null, onChange: v => { ev.yards = v; build(); } })), numberInput({ value: ev.yards, cls: 'yard-input', attrs: { 'aria-label': 'Penalty yards', min: 0 }, onInput: v => { ev.yards = E.num(v, 0); rr(); } }))));
+      const yardsBtn = intField({ key: 'penaltyYards', primary: true, label: 'Penalty yards', get: () => E.num(ev.yards, 0), set: v => { ev.yards = v; yardSeg.setValue(v); rr(); } });
+      const yardSeg = seg({ options: [5, 10, 15].map(n => ({ v: n, l: n + ' yds' })), value: E.num(ev.yards, 0), onChange: v => { ev.yards = v; yardsBtn.refresh(); yardSeg.setValue(v); Keypad.touched(yardsBtn._numTarget); rr(); } });
+      body.append(field('Yards', h('div', { class: 'row' }, h('div', { class: 'grow' }, yardSeg), yardsBtn)));
       body.append(field('Status', seg({ options: [{ v: 'accepted', l: 'Accepted' }, { v: 'declined', l: 'Declined' }, { v: 'offsetting', l: 'Offsetting' }], value: ev.status, onChange: v => { ev.status = v; build(); } })));
       if (ev.status === 'accepted') {
         body.append(field('Enforce from', seg({ options: [{ v: 'current', l: 'Where the ball is now' }, { v: 'previous', l: 'Previous spot' }], value: ev.from, onChange: v => { ev.from = v; build(); } })));
@@ -1859,10 +1960,12 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         const o = ev.override = ev.override || {};
         const poss = o.possession || (ev.from === 'previous' && st.snapshot ? st.snapshot.possession : st.possession) || 'home';
         body.append(field('Possession', teamSeg(g, poss, v => { o.possession = v; build(); })));
-        body.append(spotPicker(g, { ev: o, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', team: poss, start: st.spot, defaultSpot: st.spot, label: 'Ball placed at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
+        body.append(spotPicker(g, { ev: o, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', key: 'overrideSpot', team: poss, start: st.spot, defaultSpot: st.spot, label: 'Ball placed at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
         body.append(field('Down', seg({ options: [1, 2, 3, 4].map(n => ({ v: n, l: E.ordinal(n) })), value: E.num(o.down, null), onChange: v => { o.down = v; build(); } })));
-        body.append(field('Distance', h('div', { class: 'row' }, numberInput({ value: o.distance === 'goal' ? '' : (o.distance == null ? '' : o.distance), cls: 'yard-input', attrs: { min: 0 }, onInput: v => { o.distance = v === '' ? '' : E.num(v, 10); rr(); } }), h('button', { type: 'button', class: 'btn sm' + (o.distance === 'goal' ? ' primary' : ''), onclick: () => { o.distance = o.distance === 'goal' ? '' : 'goal'; build(); } }, 'Goal to go'))));
-        body.append(h('div', { class: 'help' }, 'Leave a field blank to keep the computed value.'));
+        const distBtn = intField({ key: 'overrideDistance', label: 'Distance to go', get: () => (o.distance === 'goal' || o.distance == null || o.distance === '' ? 10 : E.num(o.distance, 10)), format: v => (o.distance === 'goal' ? 'Goal' : (o.distance == null || o.distance === '' ? '—' : String(v))), set: v => { o.distance = v; goalBtn.classList.toggle('primary', false); rr(); } });
+        const goalBtn = h('button', { type: 'button', class: 'btn sm' + (o.distance === 'goal' ? ' primary' : ''), onclick: () => { o.distance = o.distance === 'goal' ? '' : 'goal'; build(); } }, 'Goal to go');
+        body.append(field('Distance', h('div', { class: 'row' }, distBtn, goalBtn)));
+        body.append(h('div', { class: 'help' }, 'Leave a field alone to keep the computed value.'));
       }
       body.append(optionsBlock(ev));
       rr();
@@ -1880,6 +1983,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     if (ev.quarter == null) ev.quarter = st.quarter;
     if (ev.homeScore == null) ev.homeScore = st.score.home;
     if (ev.awayScore == null) ev.awayScore = st.score.away;
+    if (ev.homeTimeouts == null) ev.homeTimeouts = st.timeouts.home;
+    if (ev.awayTimeouts == null) ev.awayTimeouts = st.timeouts.away;
     const pv = previewBox(g, ctx, ev);
     const rr = () => pv.refresh();
     function build() {
@@ -1887,14 +1992,16 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       body.append(h('div', { class: 'help' }, 'Use this when the app and the field disagree. It sets the situation from here on; earlier plays are not changed.'));
       body.append(field('What is next', seg({ options: [{ v: 'play', l: 'Scrimmage play' }, { v: 'kickoff', l: 'Kickoff' }, { v: 'try', l: 'PAT / 2-pt' }], value: ev.phase, onChange: v => { ev.phase = v; if (v === 'try') ev.spot = E.trySpot(ev.possession, g); if (v === 'kickoff') ev.spot = E.kickSpotFor(ev.possession, g, 'kickoff'); build(); } })));
       body.append(field(ev.phase === 'kickoff' ? 'Kicking team' : 'Ball', teamSeg(g, ev.possession, v => { ev.possession = v; if (ev.phase === 'try') ev.spot = E.trySpot(v, g); if (ev.phase === 'kickoff') ev.spot = E.kickSpotFor(v, g, 'kickoff'); build(); })));
-      body.append(spotPicker(g, { ev, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', team: ev.possession, start: E.num(ev.spot, st.spot), defaultSpot: E.num(ev.spot, st.spot), label: ev.phase === 'kickoff' ? 'Kick from' : 'Ball at', deltaLabel: () => '', quarter: E.num(ev.quarter, st.quarter), field: true, allowYards: false, onChange: rr }));
+      body.append(spotPicker(g, { ev, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', key: 'situationSpot', team: ev.possession, start: E.num(ev.spot, st.spot), defaultSpot: E.num(ev.spot, st.spot), primary: true, label: ev.phase === 'kickoff' ? 'Kick from' : 'Ball at', deltaLabel: () => '', quarter: E.num(ev.quarter, st.quarter), field: true, allowYards: false, onChange: rr }));
       if (ev.phase === 'play') {
         body.append(field('Down', seg({ options: [1, 2, 3, 4].map(n => ({ v: n, l: E.ordinal(n) })), value: E.num(ev.down, 1), onChange: v => { ev.down = v; build(); } })));
-        body.append(field('Distance', h('div', { class: 'row' }, numberInput({ value: ev.distance === 'goal' ? '' : ev.distance, cls: 'yard-input', attrs: { min: 0 }, onInput: v => { ev.distance = v === '' ? 10 : E.num(v, 10); rr(); } }), h('button', { type: 'button', class: 'btn sm' + (ev.distance === 'goal' ? ' primary' : ''), onclick: () => { ev.distance = ev.distance === 'goal' ? 10 : 'goal'; build(); } }, 'Goal to go'))));
+        const distBtn = intField({ key: 'situationDistance', label: 'Distance to go', get: () => (ev.distance === 'goal' ? 10 : E.num(ev.distance, 10)), format: v => (ev.distance === 'goal' ? 'Goal' : String(v)), set: v => { ev.distance = v; goalBtn.classList.remove('primary'); rr(); } });
+        const goalBtn = h('button', { type: 'button', class: 'btn sm' + (ev.distance === 'goal' ? ' primary' : ''), onclick: () => { ev.distance = ev.distance === 'goal' ? 10 : 'goal'; build(); } }, 'Goal to go');
+        body.append(field('Distance', h('div', { class: 'row' }, distBtn, goalBtn)));
       }
       body.append(field('Quarter', seg({ options: [1, 2, 3, 4, 5].map(n => ({ v: n, l: n === 5 ? 'OT' : 'Q' + n })), value: E.num(ev.quarter, 1), onChange: v => { ev.quarter = v; build(); } })));
-      body.append(field('Score', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), numberInput({ value: ev.homeScore, cls: 'yard-input', attrs: { min: 0 }, onInput: v => { ev.homeScore = v; rr(); } }), h('span', { class: 'muted' }, ab(g, 'away')), numberInput({ value: ev.awayScore, cls: 'yard-input', attrs: { min: 0 }, onInput: v => { ev.awayScore = v; rr(); } }))));
-      body.append(field('Timeouts left', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), numberInput({ value: ev.homeTimeouts != null ? ev.homeTimeouts : st.timeouts.home, cls: 'yard-input', attrs: { min: 0, max: 9 }, onInput: v => { ev.homeTimeouts = v; } }), h('span', { class: 'muted' }, ab(g, 'away')), numberInput({ value: ev.awayTimeouts != null ? ev.awayTimeouts : st.timeouts.away, cls: 'yard-input', attrs: { min: 0, max: 9 }, onInput: v => { ev.awayTimeouts = v; } }))));
+      body.append(field('Score', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), intField({ key: 'homeScore', label: ab(g, 'home') + ' score', max: 199, get: () => E.num(ev.homeScore, 0), set: v => { ev.homeScore = v; rr(); } }), h('span', { class: 'muted' }, ab(g, 'away')), intField({ key: 'awayScore', label: ab(g, 'away') + ' score', max: 199, get: () => E.num(ev.awayScore, 0), set: v => { ev.awayScore = v; rr(); } }))));
+      body.append(field('Timeouts left', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), intField({ key: 'homeTimeouts', label: ab(g, 'home') + ' timeouts', max: 9, get: () => E.num(ev.homeTimeouts, 0), set: v => { ev.homeTimeouts = v; rr(); } }), h('span', { class: 'muted' }, ab(g, 'away')), intField({ key: 'awayTimeouts', label: ab(g, 'away') + ' timeouts', max: 9, get: () => E.num(ev.awayTimeouts, 0), set: v => { ev.awayTimeouts = v; rr(); } }))));
       body.append(pv, optionsBlock(ev));
       rr();
     }
@@ -1945,7 +2052,6 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   }
   function validate(ev) {
     if (ev.type === 'penalty' && ev.status === 'accepted' && !(E.num(ev.yards, 0) >= 0)) return 'Enter the penalty yards.';
-    if (ev.type === 'pass' && ev.result === 'complete' && !ev.td && ev.mode === 'spot' && ev.endSpot === '') return 'Enter where the play ended.';
     return null;
   }
 
@@ -1976,7 +2082,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return { status: 'saved' };
   }
 
-  window.CC = { h, $, esc, toast, DB, UI, load, save, game, recompute, getR: () => R, commit, undo, ab, roster, pname, shortName, fieldSVG, fieldCaption, openSheet, closeSheet, seg, field, toggle, numberInput, teamSeg, playerPicker, spotPicker, forms, openForm, TITLES, loadScript, saveFile, inViewer };
+  window.CC = { h, $, esc, toast, DB, UI, load, save, game, recompute, getR: () => R, commit, undo, ab, roster, pname, shortName, fieldSVG, fieldCaption, openSheet, closeSheet, seg, field, toggle, numberInput, teamSeg, playerPicker, spotPicker, numField, Keypad, forms, openForm, TITLES, loadScript, saveFile, inViewer };
   // render is provided by app-views.js
   function render() { if (window.CC.render) window.CC.render(); }
 })();
@@ -2094,7 +2200,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const card = h('div', { class: 'card lastplay' });
     if (last) {
       card.append(h('div', { class: 'txt' }, h('div', { class: 'lbl' }, 'Last entry · ' + E.dd(last.before, g)), h('div', null, last.text)), h('div', { class: 'stack', style: 'gap:6px' }, h('button', { type: 'button', class: 'btn sm', onclick: undo }, 'Undo'), h('button', { type: 'button', class: 'btn sm ghost', onclick: () => editEvent(n - 1) }, 'Edit')));
-    } else card.append(h('div', { class: 'txt' }, h('div', { class: 'lbl' }, 'No plays yet'), h('div', { class: 'muted' }, 'Tap Kickoff to start. Rosters and settings are under More.')));
+    } else card.append(h('div', { class: 'txt' }, h('div', { class: 'lbl' }, 'No plays yet'), h('div', { class: 'muted' }, 'Tap Kickoff to start. Rosters, field length and settings are under More.')));
     wrap.append(card);
   }
   function flipView(g, q) {
@@ -2538,7 +2644,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   function helpText(b) {
     const p = t => b.append(h('p', { class: 'help' }, t));
     p('Every play you enter goes into the log. The score, down and distance, ball spot, possession and all the stats are recomputed from the log every time, so you can edit, delete or insert any play at any time and everything after it corrects itself. Undo takes back your last change.');
-    p('Ball spots are entered as a team side plus a yard line (the way the announcer calls it), or as yards gained. The field picture only shows which direction each team is going; flipping it never changes a play. The view flips by itself after the 1st and 3rd quarters, and you can flip it by hand any time.');
+    p('Numbers are typed on the app\u2019s own keypad at the bottom of each play screen, so the phone keyboard never pops up during a game. A spot is a team side plus a yard line (the way the announcer calls it): tap 3, 4 for the 34, and the side buttons to switch sides. You can also tap the field picture, use the \u22121/+1 and \u22125/+5 buttons, or switch to yards gained. The field picture only shows which direction each team is going; flipping it never changes a play. It flips by itself after the 1st and 3rd quarters.');
     p('Penalties: pick the foul, who it is on, accepted or declined, and whether it is marked off from where the ball is (dead-ball fouls, or fouls tacked on after a play) or from the previous spot (the last play is wiped out and its stats removed). Half the distance is applied automatically. The Result box shows the new down and distance before you save, and you can adjust it by hand when the officials do something unusual.');
     p('Sacks count as rushing attempts for the quarterback (high-school and college convention). Two tacklers on a play each get an assist, and share a sack or tackle for loss. Kneel-downs count as rushes. All of this can be changed under Rules & scoring.');
     p('If the app and the field ever disagree, tap Set situation and type in what the chain crew has. The plays already entered stay as they are.');
@@ -2578,7 +2684,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   function startEditor(b, g, R) {
     const S = E.settingsOf(g);
     const started = g.events.length > 0;
-    b.append(field('Field length', seg({ options: [{ v: 80, l: '80 yards (8-man)' }, { v: 100, l: '100 yards' }], value: S.fieldLength, onChange: v => {
+    b.append(field('Field length', seg({ options: [{ v: 100, l: '100 yards' }, { v: 80, l: '80 yards' }], value: S.fieldLength, onChange: v => {
       commit(gg => { gg.settings.fieldLength = v; if (v === 80) { gg.settings.kickoffSpot = 30; gg.settings.touchbackSpot = 15; gg.settings.safetyKickSpot = 15; } else { gg.settings.kickoffSpot = 40; gg.settings.touchbackSpot = 20; gg.settings.safetyKickSpot = 20; } }, 'Field set to ' + v + ' yards');
     } })));
     b.append(h('div', { class: 'row' },
@@ -2611,21 +2717,21 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     });
     g.example = true; g.meta.site = 'Example game — delete it when you start your own';
     g.events = [
-      { type: 'kickoff', team: 'away', kicker: '9', mode: 'spot', kickTo: 5, result: 'return', returner: '5', retMode: 'spot', endSpot: 22 },
-      { type: 'rush', team: 'home', carrier: '5', mode: 'spot', endSpot: 27, result: 'tackled', tacklers: ['32'] },
-      { type: 'pass', team: 'home', passer: '2', receiver: '11', result: 'complete', mode: 'spot', endSpot: 41, tacklers: ['32'] },
+      { type: 'kickoff', team: 'away', kicker: '9', mode: 'spot', kickTo: 5, result: 'return', returner: '5', retMode: 'spot', endSpot: 25 },
+      { type: 'rush', team: 'home', carrier: '5', mode: 'spot', endSpot: 30, result: 'tackled', tacklers: ['32'] },
+      { type: 'pass', team: 'home', passer: '2', receiver: '11', result: 'complete', mode: 'spot', endSpot: 44, tacklers: ['32'] },
       { type: 'penalty', against: 'home', name: 'False start', yards: 5, status: 'accepted', from: 'current', downResult: 'keep' },
       { type: 'pass', team: 'home', passer: '2', receiver: '11', result: 'incomplete', pbu: ['3'] },
-      { type: 'rush', team: 'home', carrier: '2', mode: 'spot', endSpot: 52, result: 'tackled', tacklers: ['32', '24'] },
+      { type: 'rush', team: 'home', carrier: '2', mode: 'spot', endSpot: 55, result: 'tackled', tacklers: ['32', '24'] },
       { type: 'pass', team: 'home', passer: '2', receiver: '11', result: 'complete', td: true },
       { type: 'pat', team: 'home', kind: 'kick', result: 'good', kicker: '7' },
       { type: 'kickoff', team: 'home', kicker: '7', result: 'touchback' },
-      { type: 'rush', team: 'away', carrier: '24', mode: 'spot', endSpot: 58, result: 'tackled', tacklers: ['44'] },
-      { type: 'pass', team: 'away', passer: '8', result: 'sack', mode: 'spot', endSpot: 64, tacklers: ['55'] },
-      { type: 'pass', team: 'away', passer: '8', receiver: '3', result: 'intercepted', interceptor: '21', intSpot: 45, intEndSpot: 35 },
+      { type: 'rush', team: 'away', carrier: '24', mode: 'spot', endSpot: 72, result: 'tackled', tacklers: ['44'] },
+      { type: 'pass', team: 'away', passer: '8', result: 'sack', mode: 'spot', endSpot: 78, tacklers: ['55'] },
+      { type: 'pass', team: 'away', passer: '8', receiver: '3', result: 'intercepted', interceptor: '21', intSpot: 55, intEndSpot: 65 },
       { type: 'period_end' },
-      { type: 'rush', team: 'home', carrier: '5', mode: 'spot', endSpot: 30, result: 'fumble', fumble: { forcedBy: '32', recTeam: 'away', recBy: '32', recSpot: 30 } },
-      { type: 'pass', team: 'away', passer: '8', receiver: '3', result: 'complete', mode: 'spot', endSpot: 12, tacklers: ['21'] },
+      { type: 'rush', team: 'home', carrier: '5', mode: 'spot', endSpot: 62, result: 'fumble', fumble: { forcedBy: '32', recTeam: 'away', recBy: '32', recSpot: 62 } },
+      { type: 'pass', team: 'away', passer: '8', receiver: '3', result: 'complete', mode: 'spot', endSpot: 20, tacklers: ['21'] },
       { type: 'rush', team: 'away', carrier: '24', result: 'td' },
       { type: 'pat', team: 'away', kind: 'run', result: 'good', carrier: '24' }
     ];
