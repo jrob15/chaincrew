@@ -163,8 +163,6 @@ button { cursor: pointer; touch-action: manipulation; }
 .chip span { font-size: 11px; color: var(--muted); max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .chip.on span { color: var(--bg); opacity: .75; }
-.chip.other { border-style: dashed; color: var(--muted); font-size: 15px; font-weight: 600; min-width: 72px; }
-.chip.other.active { border-style: solid; border-color: var(--accent); color: var(--fg); }
 input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; min-height: 46px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); }
 textarea { min-height: 96px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
 input[type="color"] { width: 54px; height: 46px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
@@ -184,24 +182,66 @@ details.adv summary { cursor: pointer; min-height: 44px; display: flex; align-it
 details.adv > .stack { padding-bottom: 12px; }
 .help { color: var(--muted); font-size: 14px; }
 
-/* keypad */
-.keypad { flex: 0 0 auto; border-top: 1px solid var(--line); background: var(--surface); padding: 6px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); user-select: none; -webkit-user-select: none; }
-.kp-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 2px 4px 8px; }
-.kp-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kp-readout { font-family: var(--font-display); font-size: 20px; font-weight: 700; text-align: right; white-space: nowrap; }
-.kp-sides { grid-column: 1 / -1; display: flex; gap: 6px; }
-.kp-side { flex: 1 1 auto; min-height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-weight: 600; font-size: 14px; }
-.kp-side.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.kp-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.kp-key { min-height: 46px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1; }
+/* wizard: one question per screen */
+.wiz { position: fixed; inset: 0; z-index: 25; background: var(--bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+.wiz-head { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; padding: 4px max(10px, env(safe-area-inset-right, 0px)) 4px max(10px, env(safe-area-inset-left, 0px)); background: var(--surface); border-bottom: 1px solid var(--line); }
+.wiz-back, .wiz-cancel { background: none; border: 0; color: var(--info); font-weight: 600; font-size: 16px; min-height: 44px; min-width: 64px; padding: 0 6px; text-align: left; }
+.wiz-cancel { text-align: right; }
+.wiz-title { flex: 1 1 auto; min-width: 0; text-align: center; font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wiz-strip { flex: 0 0 auto; display: flex; gap: 6px; overflow-x: auto; padding: 8px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); scrollbar-width: none; }
+.wiz-strip::-webkit-scrollbar { display: none; }
+.crumb { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-height: 40px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-align: left; }
+.crumb.future { opacity: .6; border-style: dashed; }
+.crumb .cl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.crumb .cv { font-size: 14px; font-weight: 600; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wiz-q { flex: 0 0 auto; font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--fg); padding: 8px max(16px, env(safe-area-inset-right, 0px)) 4px max(16px, env(safe-area-inset-left, 0px)); }
+.wiz-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 8px; }
+.wiz-body .stack { gap: 8px; }
+.wiz-body > * { flex: 0 0 auto; }
+.wiz-foot { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); border-top: 1px solid var(--line); background: var(--surface); }
+.wiz-foot .btn.big { width: 100%; }
+.wiz-preview .big { font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.pchip { min-height: 62px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; padding: 4px; min-width: 0; }
+.pchip b { font-family: var(--font-display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pchip span { font-size: 11px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pchip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.pchip.on span { color: var(--bg); opacity: .75; }
+.pchip.other { border-style: dashed; }
+.pchip.other b { font-size: 15px; font-family: var(--font-body); font-weight: 600; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choices.one { grid-template-columns: 1fr; }
+.choice { min-height: 66px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 10px; min-width: 0; }
+.choice b { font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: .03em; text-align: center; line-height: 1.05; }
+.choice span { font-size: 12px; color: var(--muted); }
+.choice.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.choice.on span { color: var(--bg); opacity: .75; }
+.choice.gold.on { background: var(--accent); color: var(--accent-fg); }
+.bigseg { display: flex; gap: 8px; }
+.bigseg.wrap { flex-wrap: wrap; }
+.bigseg button { flex: 1 1 auto; min-height: 50px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: .03em; min-width: 0; }
+.bigseg button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.spot-read { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.spot-read .yard { font-family: var(--font-display); font-size: 42px; font-weight: 700; line-height: 1; letter-spacing: .01em; }
+.spot-read .delta { font-size: 16px; color: var(--accent); font-weight: 600; margin-top: 2px; }
+.spot-read .delta.neg { color: var(--bad); }
+.spot-read .dd { font-size: 15px; color: var(--muted); text-align: right; font-weight: 600; }
+.spot-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.spot-right .linkbtn { padding: 2px 0; font-size: 14px; }
+.ended { font-family: var(--font-display); font-size: 40px; font-weight: 700; color: var(--accent); text-align: center; padding: 24px 0; letter-spacing: .06em; }
+.shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.shortcuts button { min-height: 46px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 600; font-size: 16px; }
+.shortcuts button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.shortcuts button.gold.on { background: var(--accent); color: var(--accent-fg); }
+.kp-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; user-select: none; -webkit-user-select: none; }
+.kp-key { min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1; }
 .kp-key:active { background: var(--fg); color: var(--bg); }
 .kp-key.alt { font-family: var(--font-body); font-size: 15px; font-weight: 700; }
 .kp-key.alt.go { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
 .kp-key.bs { font-size: 20px; }
 .kp-key[disabled] { opacity: .3; }
-.numfield { min-width: 88px; min-height: 52px; padding: 4px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); font-family: var(--font-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; line-height: 1; }
-.numfield.active { border-color: var(--accent); background: var(--surface); }
-.numfield.sm { min-height: 46px; font-size: 22px; min-width: 72px; }
+.kp-big { font-family: var(--font-display); font-size: 40px; font-weight: 700; text-align: center; }
+.wiz input[type="text"] { font-size: 18px; min-height: 52px; }
 
 /* log */
 .qhead { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 14px 0 4px; border-bottom: 1px solid var(--line); }
@@ -1230,9 +1270,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
-/* Chain Crew UI — core: storage, helpers, field drawing, sheet + on-screen keypad, form widgets, play forms.
-   Nothing in a play form opens the phone's keyboard: every number is entered on the app's own keypad,
-   by tapping the field, or with the ±1/±5 steppers, so a form never loses focus mid-entry. */
+/* Chain Crew UI — core: storage, helpers, field drawing, menus/sheets, small widgets. Play entry lives in app-wizard.js. */
 (function () {
   'use strict';
   const E = window.Engine;
@@ -1335,7 +1373,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     opts = opts || {};
     const L = E.settingsOf(g).fieldLength;
     const homeLeft = E.homeOnLeft(g, quarter);
-    const W = 1000, H = opts.compact ? 150 : 200, ez = 80, unit = (W - 2 * ez) / L;
+    const W = 1000, H = opts.compact ? 120 : 200, ez = 80, unit = (W - 2 * ez) / L;
     const x = abs => homeLeft ? ez + abs * unit : ez + (L - abs) * unit;
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
@@ -1406,113 +1444,13 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       h('span', null, ab(g, homeLeft ? 'away' : 'home') + ' goal ▶'));
   }
 
-  /* ---------- keypad ----------
-     One keypad per sheet, docked above the Cancel/Add buttons. A number field (numField) binds it;
-     digits replace the field's value on the first press and append after that, so "3","4" gives 34
-     and the next digit starts a new number. The phone keyboard is never involved. */
-  const Keypad = {
-    el: null, body: null, head: null, altKey: null, t: null, buf: '', fresh: true, neg: false, lastKey: null,
-    create() { return h('div', { class: 'keypad', hidden: true }); },
-    mount(el, body) {
-      this.el = el; this.body = body; this.t = null; this.lastKey = null;
-      el.replaceChildren();
-      this.head = h('div', { class: 'kp-head' });
-      const keys = h('div', { class: 'kp-keys' });
-      const key = (label, k, cls) => h('button', { type: 'button', class: 'kp-key' + (cls ? ' ' + cls : ''), 'data-k': k, onclick: () => this.press(k) }, label);
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(d => keys.append(key(d, d)));
-      this.altKey = key('', 'alt', 'alt');
-      keys.append(this.altKey, key('0', '0'), key('⌫', 'bs', 'bs'));
-      keys.addEventListener('pointerdown', e => e.preventDefault());
-      el.append(this.head, keys);
-    },
-    unmount() { this.el = null; this.body = null; this.t = null; this.lastKey = null; },
-    bind(t) {
-      if (!this.el) return;
-      if (this.t && this.t.el && this.t.el !== t.el) this.t.el.classList.remove('active');
-      this.t = t; this.lastKey = t.key; this.buf = ''; this.fresh = true; this.neg = t.kind === 'yards' && Number(t.get()) < 0;
-      t.el.classList.add('active');
-      this.el.hidden = false;
-      this.update();
-    },
-    unbind() { if (this.t && this.t.el) this.t.el.classList.remove('active'); this.t = null; if (this.el) this.el.hidden = true; },
-    // after a form rebuilds, re-attach to the same field (by key) or the form's primary field
-    rebind() {
-      if (!this.el || !this.body) return;
-      if (this.t && this.t.el && this.body.contains(this.t.el)) { this.update(); return; }
-      const key = (this.t && this.t.key) || this.lastKey;
-      let el = key ? this.body.querySelector('[data-numkey="' + String(key).replace(/"/g, '') + '"]') : null;
-      if (!el) el = this.body.querySelector('[data-numkey][data-primary]');
-      if (el && el._numTarget) this.bind(el._numTarget); else this.unbind();
-    },
-    // the field's value changed some other way (field tap, stepper, preset): start a fresh entry
-    touched(t) {
-      if (!this.t || !t || this.t.key !== t.key) return;
-      this.buf = ''; this.fresh = true; this.neg = t.kind === 'yards' && Number(t.get()) < 0; this.update();
-    },
-    update() {
-      const t = this.t; if (!t || !this.el) return;
-      this.head.replaceChildren(
-        h('div', { class: 'kp-label' }, t.label || ''),
-        h('div', { class: 'kp-readout num' }, t.kind === 'jersey' ? (this.buf ? '#' + this.buf : 'type a number') : (t.readout ? t.readout() : String(t.get()))),
-        t.sides ? h('div', { class: 'kp-sides' }, ...t.sides.options.map(s => h('button', { type: 'button', class: 'kp-side' + (s.v === t.sides.value() ? ' on' : ''), onclick: () => { t.sides.onChange(s.v); } }, s.l))) : null);
-      const alt = this.altKey;
-      alt.disabled = false; alt.classList.remove('go');
-      if (t.kind === 'yards') alt.textContent = '±';
-      else if (t.kind === 'jersey') { alt.textContent = this.buf ? 'Add #' + this.buf : 'Add'; alt.classList.toggle('go', !!this.buf); alt.disabled = !this.buf; }
-      else if (t.kind === 'yardline') alt.textContent = String(t.mid != null ? t.mid : 50);
-      else { alt.textContent = ''; alt.disabled = true; }
-      if (t.kind === 'jersey') t.el.textContent = this.buf ? '#' + this.buf : (t.placeholder || 'other #');
-      else if (t.el.refresh) t.el.refresh();
-    },
-    press(k) {
-      const t = this.t; if (!t) return;
-      const max = t.max == null ? 999 : t.max;
-      const maxDigits = String(Math.floor(Math.abs(max))).length;
-      if (k === 'bs') {
-        this.buf = this.fresh ? '' : this.buf.slice(0, -1); this.fresh = false;
-        this.apply();
-      } else if (k === 'alt') {
-        if (t.kind === 'yards') { if (this.fresh) { this.buf = String(Math.abs(Number(t.get()) || 0)); this.fresh = false; } this.neg = !this.neg; this.apply(); }
-        else if (t.kind === 'jersey') { const v = this.buf; if (!v) return; this.buf = ''; this.fresh = true; if (t.onDone) t.onDone(v); this.update(); }
-        else if (t.kind === 'yardline') { this.buf = String(t.mid != null ? t.mid : 50); this.fresh = true; this.apply(); }
-      } else {
-        if (this.fresh) { this.buf = k; this.fresh = false; if (t.kind === 'yards') this.neg = false; }
-        else { let nb = this.buf + k; if (nb.length > maxDigits || Number(nb) > max) nb = k; this.buf = nb; }
-        this.apply();
-        if (this.buf.length >= maxDigits) this.fresh = true;
-      }
-    },
-    apply() {
-      const t = this.t; if (!t) return;
-      if (t.kind === 'jersey') { this.update(); return; }
-      let v = Number(this.buf || 0);
-      if (t.kind === 'yards' && this.neg) v = -v;
-      if (t.max != null) v = Math.min(v, t.max);
-      if (t.min != null) v = Math.max(v, t.min);
-      t.set(v);
-      this.update();
-    }
-  };
-  // a tappable number display that the keypad edits
-  // o: {key, primary, kind:'yardline'|'yards'|'int'|'jersey', label, get, set, format, max, min, mid, readout, sides, onDone, placeholder, cls}
-  function numField(o) {
-    const el = h('button', { type: 'button', class: 'numfield' + (o.cls ? ' ' + o.cls : ''), 'data-numkey': o.key, 'data-primary': o.primary ? '' : null, 'aria-label': o.label || '' });
-    const t = Object.assign({ el }, o);
-    el._numTarget = t;
-    el.refresh = () => { if (o.kind !== 'jersey') el.textContent = o.format ? o.format(o.get()) : String(o.get()); };
-    if (o.kind === 'jersey') el.textContent = o.placeholder || 'other #'; else el.refresh();
-    el.addEventListener('click', () => Keypad.bind(t));
-    return el;
-  }
-
-  /* ---------- sheet ---------- */
+  /* ---------- sheet (menus, text views) ---------- */
   let sheetState = null;
   function openSheet(o) {
     closeSheet();
     const bg = h('div', { class: 'sheet-bg', onclick: () => { if (!o.modal) closeSheet(); } });
     const body = h('div', { class: 'sheet-body' });
     const err = h('div', { class: 'err hide' });
-    const pad = Keypad.create();
     const foot = h('div', { class: 'sheet-foot' });
     if (o.onSave) {
       foot.append(h('button', { class: 'btn ghost', type: 'button', onclick: closeSheet }, 'Cancel'));
@@ -1524,18 +1462,16 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     } else foot.append(h('button', { class: 'btn ghost', type: 'button', onclick: closeSheet }, 'Close'));
     const sheet = h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true' },
       h('div', { class: 'sheet-head' }, h('div', null, h('h2', null, o.title), o.ctx ? h('div', { class: 'ctx' }, o.ctx) : null), h('button', { class: 'btn sm ghost', type: 'button', onclick: closeSheet }, '✕')),
-      body, pad, foot);
+      body, foot);
     document.body.append(bg, sheet);
-    sheetState = { bg, sheet, body, err, pad };
-    Keypad.mount(pad, body);
+    sheetState = { bg, sheet, body, err };
     o.build(body, { close: closeSheet, error: m => { err.textContent = m; err.classList.remove('hide'); body.prepend(err); } });
-    Keypad.rebind();
     return sheetState;
   }
-  function closeSheet() { if (!sheetState) return; Keypad.unmount(); sheetState.bg.remove(); sheetState.sheet.remove(); sheetState = null; }
+  function closeSheet() { if (!sheetState) return; sheetState.bg.remove(); sheetState.sheet.remove(); sheetState = null; }
 
-  /* ---------- widgets ---------- */
-  function seg(o) { // {options:[{v,l,cls}], value, onChange, tight}
+  /* ---------- small widgets (settings screens) ---------- */
+  function seg(o) {
     const wrap = h('div', { class: 'seg' + (o.tight ? ' tight' : '') });
     const btns = o.options.map(opt => h('button', { type: 'button', class: (opt.v === o.value ? 'on ' : '') + (opt.cls || ''), onclick: () => { o.onChange(opt.v); } }, opt.l));
     wrap.append(...btns);
@@ -1547,512 +1483,22 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const inp = h('input', { type: 'checkbox', checked, onchange: e => onChange(e.target.checked) });
     return h('label', { class: 'toggle' }, inp, h('span', null, label));
   }
-  // plain number input: settings screens only (never inside a play form)
   function numberInput(o) {
     return h('input', Object.assign({ type: 'number', inputmode: 'decimal', step: o.step || 'any', class: o.cls || '', placeholder: o.placeholder || '', value: o.value == null ? '' : o.value, oninput: e => o.onInput(e.target.value) }, o.attrs || {}));
   }
   function teamSeg(g, value, onChange, labels) {
     return seg({ options: [{ v: 'home', l: (labels && labels.home) || ab(g, 'home') }, { v: 'away', l: (labels && labels.away) || ab(g, 'away') }], value, onChange });
   }
-
-  // player picker: single (ev[key] = num string) or multi (ev[key] = [nums]); "other #" goes through the keypad
-  function playerPicker(g, team, ev, key, o) {
-    o = o || {};
-    const wrap = h('div', { class: 'fld' });
-    const lbl = h('label', null, (o.label || 'Player') + ' ', h('span', { class: 'muted', style: 'text-transform:none;letter-spacing:0;font-weight:500' }, '(' + ab(g, team) + (o.hint ? ' · ' + o.hint : '') + ')'));
-    const chips = h('div', { class: 'chips' });
-    const isMulti = !!o.multi;
-    const cur = () => isMulti ? (Array.isArray(ev[key]) ? ev[key] : []) : ev[key];
-    const sel = n => isMulti ? cur().map(String).includes(String(n)) : String(cur()) === String(n);
-    const nums = roster(g, team).map(p => String(p.num));
-    const choose = n => {
-      n = String(n).replace(/^0+(?=\d)/, '');
-      if (isMulti) {
-        let a = cur().map(String);
-        if (a.includes(n)) a = a.filter(x => x !== n);
-        else { a.push(n); if (o.max && a.length > o.max) a.shift(); }
-        ev[key] = a;
-      } else ev[key] = sel(n) ? '' : n;
-      if (!isMulti && ev[key]) UI.lastPlayer[team + ':' + key] = ev[key];
-      rebuild(); if (o.onChange) o.onChange();
-    };
-    const other = numField({ key: team + ':' + key + ':other', kind: 'jersey', label: 'Other ' + ab(g, team) + ' jersey number', max: 99, cls: 'chip other', placeholder: 'other #', get: () => '', set: () => {}, onDone: choose });
-    function rebuild() {
-      chips.replaceChildren();
-      if (o.allowNone !== false && !isMulti) chips.append(h('button', { type: 'button', class: 'chip' + (!cur() ? ' on' : ''), onclick: () => { ev[key] = ''; rebuild(); if (o.onChange) o.onChange(); } }, h('b', null, '—'), h('span', null, 'none')));
-      roster(g, team).forEach(p => chips.append(h('button', { type: 'button', class: 'chip' + (sel(p.num) ? ' on' : ''), onclick: () => choose(p.num) }, h('b', null, '#' + p.num), h('span', null, p.name || p.pos || ' '))));
-      const vals = isMulti ? cur().map(String) : (cur() != null && cur() !== '' ? [String(cur())] : []);
-      vals.forEach(n => { if (!nums.includes(n)) chips.append(h('button', { type: 'button', class: 'chip on', onclick: () => choose(n) }, h('b', null, '#' + n), h('span', null, 'added'))); });
-      chips.append(other);
-    }
-    rebuild();
-    wrap.append(lbl, chips);
-    return wrap;
-  }
-
-  // spot picker: writes ev[kMode] ('spot'|'yards'), ev[kSpot] (absolute yard), ev[kYards]
-  function spotPicker(g, o) {
-    // o: {ev, kMode, kSpot, kYards, key, primary, team, start, defaultSpot, label, deltaLabel, yardsLabel, onChange, quarter, lineToGain, field, allowYards}
-    const ev = o.ev, L = E.settingsOf(g).fieldLength, team = o.team, start = o.start;
-    const kMode = o.kMode || 'mode', kSpot = o.kSpot || 'endSpot', kYards = o.kYards || 'yards';
-    const key = o.key || kSpot;
-    if (!ev[kMode]) ev[kMode] = 'spot';
-    if (ev[kMode] === 'spot' && (ev[kSpot] == null || ev[kSpot] === '')) ev[kSpot] = o.defaultSpot != null ? o.defaultSpot : start;
-    if (ev[kMode] === 'yards' && (ev[kYards] == null || ev[kYards] === '')) ev[kYards] = 0;
-    const dl = o.deltaLabel || (y => y > 0 ? 'Gain of ' + E.fmtYard(y) : y < 0 ? 'Loss of ' + E.fmtYard(-y) : 'No gain');
-    const abs = () => ev[kMode] === 'yards' ? E.clamp(start + E.num(ev[kYards], 0) * E.dir(team), 0, L) : E.clamp(E.num(ev[kSpot], start), 0, L);
-    const yds = () => ev[kMode] === 'yards' ? E.num(ev[kYards], 0) : E.gain(team, start, E.num(ev[kSpot], start));
-    const curSide = () => { const q = E.spotParts(abs(), L); return q.side === 'mid' ? E.opp(team) : q.side; };
-    const curYard = () => E.spotParts(abs(), L).yard;
-    const readoutText = () => { const d = dl(yds()); return E.fmtSpot(abs(), g) + (d ? ' · ' + d : ''); };
-    const sideOptions = [{ v: 'home', l: ab(g, 'home') + (team === 'home' ? ' (own)' : '') }, { v: 'away', l: ab(g, 'away') + (team === 'away' ? ' (own)' : '') }];
-    const readout = h('div', { class: 'readout num' });
-    const controls = h('div', { class: 'stack' });
-    const wrap = h('div', { class: 'spot' }, h('div', { class: 'row' }, h('span', { class: 'lbl grow' }, o.label || 'Ball spotted at'), readout), controls);
-    let fieldEl = null, numBtn = null, sideSeg = null;
-    function refresh(external) {
-      const y = yds(), d = dl(y);
-      readout.replaceChildren(h('span', null, E.fmtSpot(abs(), g)), ...(d ? [h('span', { class: 'muted' }, ' · '), h('span', { class: 'delta' + (y < 0 ? ' neg' : '') }, d)] : []));
-      if (numBtn) numBtn.refresh();
-      if (sideSeg) sideSeg.setValue(curSide());
-      if (fieldEl) fieldEl.setMarker(abs());
-      if (external && numBtn) Keypad.touched(numBtn._numTarget);
-      if (o.onChange) o.onChange();
-    }
-    function setSide(v) { ev[kSpot] = E.absFrom(v, curYard(), L); refresh(true); }
-    function pickAbs(a) { ev[kSpot] = a; if (ev[kMode] !== 'spot') { ev[kMode] = 'spot'; build(); } refresh(true); }
-    function build() {
-      controls.replaceChildren(); numBtn = null; sideSeg = null; fieldEl = null;
-      if (o.allowYards !== false) controls.append(seg({ options: [{ v: 'spot', l: 'Yard line' }, { v: 'yards', l: o.yardsLabel || 'Yards gained' }], value: ev[kMode], onChange: v => { if (v === ev[kMode]) return; if (v === 'yards') ev[kYards] = yds(); else ev[kSpot] = abs(); ev[kMode] = v; build(); refresh(true); } }));
-      if (ev[kMode] === 'spot') {
-        sideSeg = seg({ options: sideOptions, value: curSide(), onChange: setSide });
-        numBtn = numField({ key, primary: o.primary, kind: 'yardline', label: o.label || 'Ball spotted at', max: L / 2, mid: L / 2, get: curYard, format: E.fmtYard, set: y => { ev[kSpot] = E.absFrom(curSide(), E.clamp(y, 0, L / 2), L); refresh(false); }, readout: readoutText, sides: { options: sideOptions, value: curSide, onChange: setSide } });
-        const stepRow = h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { ev[kSpot] = E.clamp(abs() + n * E.dir(team), 0, L); refresh(true); } }, (n > 0 ? '+' : '') + n)));
-        controls.append(h('div', { class: 'row' }, h('div', { class: 'grow' }, sideSeg), numBtn), stepRow);
-      } else {
-        numBtn = numField({ key, primary: o.primary, kind: 'yards', label: o.yardsLabel || 'Yards gained', max: 99, get: () => E.num(ev[kYards], 0), format: v => (v > 0 ? '+' : '') + E.fmtYard(v), set: v => { ev[kYards] = v; refresh(false); }, readout: readoutText });
-        const quick = h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { ev[kYards] = E.num(ev[kYards], 0) + n; refresh(true); } }, (n > 0 ? '+' : '') + n)));
-        controls.append(h('div', { class: 'row' }, h('span', { class: 'muted grow small' }, '± on the keypad makes it a loss'), numBtn), quick);
-      }
-      if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: start, lineToGain: o.lineToGain, marker: abs(), team, onPick: pickAbs, compact: true }); controls.append(h('div', null, fieldEl, h('div', { class: 'small muted' }, 'Or tap the field, then fine-tune with −1 / +1'))); }
-      refresh(false);
-    }
-    build();
-    return wrap;
-  }
-
-  // fumble sub-form; writes ev[key] = {on, forcedBy, recTeam, recBy, recSpot, retSpot, td}
-  function fumbleSection(g, ev, key, o) {
-    // o: {team (fumbling team), start (fumble spot getter), quarter, onChange}
-    const f = ev[key] = Object.assign({ on: true, recTeam: E.opp(o.team) }, ev[key] || {});
-    const wrap = h('div', { class: 'stack card flag' });
-    function build() {
-      wrap.replaceChildren(h('h3', null, 'Fumble'));
-      wrap.append(playerPicker(g, E.opp(o.team), f, 'forcedBy', { label: 'Forced by', onChange: o.onChange }));
-      wrap.append(field('Recovered by', teamSeg(g, f.recTeam, v => { f.recTeam = v; f.recBy = ''; f.td = false; build(); if (o.onChange) o.onChange(); }, { home: ab(g, 'home') + (o.team === 'home' ? ' (offense)' : ' (defense)'), away: ab(g, 'away') + (o.team === 'away' ? ' (offense)' : ' (defense)') })));
-      wrap.append(playerPicker(g, f.recTeam, f, 'recBy', { label: 'Recovering player', onChange: o.onChange }));
-      const fs = o.start();
-      wrap.append(spotPicker(g, { ev: f, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', key: 'fumbleRec', team: f.recTeam, start: fs, defaultSpot: fs, label: 'Recovered at', quarter: o.quarter, allowYards: false, onChange: o.onChange }));
-      if (f.recTeam !== o.team) {
-        wrap.append(toggle('Returned for a touchdown', !!f.td, v => { f.td = v; build(); if (o.onChange) o.onChange(); }));
-        if (!f.td) wrap.append(spotPicker(g, { ev: f, kMode: 'retMode', kSpot: 'retSpot', kYards: 'retYards', key: 'fumbleRet', team: f.recTeam, start: E.num(f.recSpot, fs), defaultSpot: E.num(f.recSpot, fs), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), quarter: o.quarter, allowYards: false, onChange: o.onChange }));
-      }
-    }
-    build();
-    return wrap;
-  }
-
-  /* ---------- result preview (replays the game with the draft appended) ---------- */
-  function previewBox(g, ctx, ev) {
-    const box = h('div', { class: 'preview' }, h('div', { class: 'lbl' }, 'Result'), h('div', { class: 'big' }), h('div', { class: 'small muted' }));
-    box.refresh = () => {
-      try {
-        const events = (g.events || []).slice(0, ctx.index == null ? g.events.length : ctx.index);
-        events.push(ev);
-        const RR = E.replay(Object.assign({}, g, { events }));
-        const d = RR.derived[RR.derived.length - 1];
-        box.children[1].textContent = E.dd(d.after, g) + (d.after.score.home !== ctx.state.score.home || d.after.score.away !== ctx.state.score.away ? '  ·  ' + ab(g, 'home') + ' ' + d.after.score.home + ' – ' + ab(g, 'away') + ' ' + d.after.score.away : '');
-        box.children[2].textContent = d.text + (d.flags.halfDistance ? ' · half the distance applied' : '') + (d.flags.error ? ' · ' + d.flags.error : '');
-      } catch (e) { box.children[2].textContent = String(e); }
-      Keypad.rebind();
-    };
-    box.refresh();
-    return box;
-  }
-
-  function optionsBlock(ev) {
-    return h('details', { class: 'adv' }, h('summary', null, 'Clock & note'), h('div', { class: 'stack' },
-      field('Game clock (optional)', h('input', { type: 'text', inputmode: 'numeric', placeholder: '11:42', value: ev.clock || '', oninput: e => { ev.clock = e.target.value; } })),
-      field('Note (optional)', h('input', { type: 'text', value: ev.note || '', oninput: e => { ev.note = e.target.value; } }))));
-  }
-  function offenseSeg(g, ev, onChange) {
-    return field('Offense', teamSeg(g, ev.team, v => { ev.team = v; onChange(); }));
-  }
-  function intField(o) { // small keypad-driven number for penalties, scores, distances
-    return numField(Object.assign({ kind: 'int', cls: 'sm', max: 99 }, o));
-  }
-
-  /* ---------- play forms ----------
-     Each form: (g, ctx, ev, body); ctx = {state, index, quarter}; ev is the draft event (mutated in place). */
-  const forms = {};
-
-  forms.rush = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = st.possession || 'home';
-    if (!ev.result) ev.result = 'tackled';
-    if (ev.carrier == null) ev.carrier = '';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      const team = ev.team, def = E.opp(team);
-      body.replaceChildren();
-      if (st.phase !== 'play' || st.possession !== team) body.append(offenseSeg(g, ev, build));
-      body.append(playerPicker(g, team, ev, 'carrier', { label: ev.kneel ? 'Kneeling player' : 'Ball carrier', onChange: rr }));
-      if (ev.result !== 'td' && ev.result !== 'safety') body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: ev.result === 'fumble' ? 'Fumbled at' : 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
-      if (ev.result === 'fumble') body.append(fumbleSection(g, ev, 'fumble', { team, start: () => (ev.mode === 'yards' ? st.spot + E.num(ev.yards, 0) * E.dir(team) : E.num(ev.endSpot, st.spot)), quarter: ctx.quarter, onChange: rr }));
-      if (ev.result !== 'td' && !ev.kneel) body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Tackle by', hint: 'up to 2 — two means both get an assist', multi: true, max: 2, onChange: rr }));
-      if (!ev.kneel) body.append(field('Result', seg({ options: [{ v: 'tackled', l: 'Tackled' }, { v: 'oob', l: 'Out of bounds' }, { v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], value: ev.result, onChange: v => { ev.result = v; build(); } })));
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.pass = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = st.possession || 'home';
-    if (!ev.result) ev.result = 'complete';
-    if (ev.passer == null) ev.passer = UI.lastPlayer[ev.team + ':passer'] || '';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      const team = ev.team, def = E.opp(team);
-      body.replaceChildren();
-      if (st.phase !== 'play' || st.possession !== team) body.append(offenseSeg(g, ev, build));
-      body.append(playerPicker(g, team, ev, 'passer', { label: 'Passer', onChange: rr }));
-      if (!ev.spike) body.append(field('Result', seg({ options: [{ v: 'complete', l: 'Complete' }, { v: 'incomplete', l: 'Incomplete' }, { v: 'intercepted', l: 'Intercepted' }, { v: 'sack', l: 'Sack' }], value: ev.result, onChange: v => { ev.result = v; ev.td = false; ev.safety = false; if (ev.fumble) ev.fumble.on = false; build(); } })));
-      if (ev.result === 'complete') {
-        body.append(playerPicker(g, team, ev, 'receiver', { label: 'Receiver', onChange: rr }));
-        body.append(toggle('Touchdown', !!ev.td, v => { ev.td = v; build(); }));
-        if (!ev.td) {
-          body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: 'Tackled / down at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
-          body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Tackle by', hint: 'up to 2', multi: true, max: 2, onChange: rr }));
-          body.append(toggle('Fumbled after the catch', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({}, ev.fumble || {}, { on: v }); build(); }));
-          if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team, start: () => (ev.mode === 'yards' ? st.spot + E.num(ev.yards, 0) * E.dir(team) : E.num(ev.endSpot, st.spot)), quarter: ctx.quarter, onChange: rr }));
-        }
-      } else if (ev.result === 'incomplete') {
-        body.append(playerPicker(g, team, ev, 'receiver', { label: 'Intended for', hint: 'optional', onChange: rr }));
-        body.append(playerPicker(g, def, ev, 'pbu', { label: 'Broken up by', hint: 'optional', multi: true, max: 2, onChange: rr }));
-        body.append(toggle('Spike (clock stop)', !!ev.spike, v => { ev.spike = v; build(); }));
-      } else if (ev.result === 'intercepted') {
-        body.append(playerPicker(g, def, ev, 'interceptor', { label: 'Intercepted by', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'intSpotMode', kSpot: 'intSpot', kYards: 'intSpotYards', team, start: st.spot, defaultSpot: st.spot, primary: true, label: 'Intercepted at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds downfield' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, allowYards: false, onChange: rr }));
-        body.append(toggle('Touchback (caught in the end zone, not returned)', !!ev.intTouchback, v => { ev.intTouchback = v; build(); }));
-        if (!ev.intTouchback) {
-          body.append(toggle('Returned for a touchdown', !!ev.intTd, v => { ev.intTd = v; build(); }));
-          if (!ev.intTd) body.append(spotPicker(g, { ev, kMode: 'intMode', kSpot: 'intEndSpot', kYards: 'intYards', team: def, start: E.num(ev.intSpot, st.spot), defaultSpot: E.num(ev.intSpot, st.spot), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
-        }
-      } else if (ev.result === 'sack') {
-        body.append(toggle('Safety (sacked in his own end zone)', !!ev.safety, v => { ev.safety = v; build(); }));
-        if (!ev.safety) body.append(spotPicker(g, { ev, team, start: st.spot, primary: true, label: 'Sacked at', quarter: ctx.quarter, lineToGain: st.lineToGain, field: true, onChange: rr }));
-        body.append(playerPicker(g, def, ev, 'tacklers', { label: 'Sack by', hint: 'two players split the sack', multi: true, max: 2, onChange: rr }));
-        if (!ev.safety) {
-          body.append(toggle('Fumbled on the sack', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({}, ev.fumble || {}, { on: v }); build(); }));
-          if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team, start: () => (ev.mode === 'yards' ? st.spot + E.num(ev.yards, 0) * E.dir(team) : E.num(ev.endSpot, st.spot)), quarter: ctx.quarter, onChange: rr }));
-        }
-      }
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.punt = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = st.possession || 'home';
-    if (!ev.result) ev.result = 'return';
-    if (ev.punter == null) ev.punter = UI.lastPlayer[ev.team + ':punter'] || '';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      const K = ev.team, Rt = E.opp(K), L = E.settingsOf(g).fieldLength;
-      body.replaceChildren();
-      if (st.phase !== 'play' || st.possession !== K) body.append(offenseSeg(g, ev, build));
-      body.append(playerPicker(g, K, ev, 'punter', { label: 'Punter', onChange: rr }));
-      body.append(field('Result', seg({ options: [{ v: 'return', l: 'Returned' }, { v: 'fair_catch', l: 'Fair catch' }, { v: 'downed', l: 'Downed' }, { v: 'oob', l: 'Out of bounds' }, { v: 'touchback', l: 'Touchback' }, { v: 'muff', l: 'Muffed' }, { v: 'blocked', l: 'Blocked' }], value: ev.result, onChange: v => { ev.result = v; ev.td = false; build(); } })));
-      if (ev.result === 'blocked') {
-        body.append(playerPicker(g, Rt, ev, 'blockedBy', { label: 'Blocked by', onChange: rr }));
-        if (!ev.recTeam) ev.recTeam = Rt;
-        body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
-        body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: st.spot, defaultSpot: st.spot, primary: true, label: 'Recovered at', deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds past the line' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true, allowYards: false, onChange: rr }));
-        if (ev.recTeam === Rt) body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; rr(); }));
-      } else {
-        if (ev.result !== 'touchback') body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'puntTo', kYards: 'puntYards', team: K, start: st.spot, defaultSpot: E.clamp(st.spot + 35 * E.dir(K), 0, L), primary: true, label: ev.result === 'return' || ev.result === 'muff' ? 'Caught / landed at' : (ev.result === 'fair_catch' ? 'Fair caught at' : 'Dead at'), deltaLabel: y => 'Punt of ' + E.fmtYard(y), yardsLabel: 'Punt distance', quarter: ctx.quarter, field: true, onChange: rr }));
-        const landing = () => ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.puntYards, 0) * E.dir(K), 0, L) : E.num(ev.puntTo, st.spot);
-        if (ev.result === 'return') {
-          body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Returner', onChange: rr }));
-          body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; build(); }));
-          if (!ev.td) {
-            body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing(), defaultSpot: landing(), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
-            body.append(toggle('Fumbled on the return', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v }); build(); }));
-            if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing() + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing())), quarter: ctx.quarter, onChange: rr }));
-          }
-        } else if (ev.result === 'fair_catch') {
-          body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Caught by', hint: 'optional', onChange: rr }));
-        } else if (ev.result === 'muff') {
-          if (!ev.recTeam) ev.recTeam = K;
-          body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Muffed by', hint: 'optional', onChange: rr }));
-          body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
-          body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-          body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing(), defaultSpot: landing(), label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-        }
-      }
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.kickoff = function (g, ctx, ev, body) {
-    const st = ctx.state, L = E.settingsOf(g).fieldLength;
-    if (!ev.team) ev.team = st.kickTeam || st.possession || 'home';
-    if (!ev.result) ev.result = 'return';
-    if (ev.kicker == null) ev.kicker = UI.lastPlayer[ev.team + ':kicker'] || '';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    const isFree = st.phase === 'free_kick';
-    function build() {
-      const K = ev.team, Rt = E.opp(K);
-      const from = () => ev.fromSpot != null && ev.fromSpot !== '' ? E.num(ev.fromSpot, st.spot) : ((st.phase === 'kickoff' || st.phase === 'free_kick') && st.kickTeam === K ? st.spot : E.kickSpotFor(K, g, isFree ? 'safety' : 'kickoff'));
-      body.replaceChildren();
-      body.append(field('Kicking team', teamSeg(g, K, v => { ev.team = v; ev.fromSpot = ''; build(); })));
-      body.append(playerPicker(g, K, ev, 'kicker', { label: 'Kicker', onChange: rr }));
-      const fromSummary = h('summary', null, 'Kicking from the ' + E.fmtSpot(from(), g));
-      body.append(h('details', { class: 'adv', open: ev.fromSpot != null && ev.fromSpot !== '' && E.num(ev.fromSpot, from()) !== st.spot }, fromSummary, h('div', { class: 'stack' }, spotPicker(g, { ev, kMode: 'fromMode', kSpot: 'fromSpot', kYards: 'fromYards', team: K, start: from(), defaultSpot: from(), label: 'Kick from', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: () => { fromSummary.textContent = 'Kicking from the ' + E.fmtSpot(from(), g); rr(); } }))));
-      body.append(field('Result', seg({ options: [{ v: 'return', l: 'Returned' }, { v: 'touchback', l: 'Touchback' }, { v: 'fair_catch', l: 'Fair catch' }, { v: 'oob', l: 'Out of bounds' }, { v: 'onside', l: 'Onside' }, { v: 'muff', l: 'Muffed' }], value: ev.result, onChange: v => { ev.result = v; ev.td = false; build(); } })));
-      const landing = () => ev.mode === 'yards' ? E.clamp(from() + E.num(ev.kickYards, 0) * E.dir(K), 0, L) : E.num(ev.kickTo, from());
-      if (ev.result !== 'touchback') {
-        const defLanding = ev.result === 'onside' ? E.clamp(from() + 10 * E.dir(K), 0, L) : E.clamp(E.goal(K, L) - 5 * E.dir(K), 0, L);
-        body.append(spotPicker(g, { ev, kMode: 'mode', kSpot: 'kickTo', kYards: 'kickYards', team: K, start: from(), defaultSpot: defLanding, primary: true, label: ev.result === 'oob' ? 'Went out at' : 'Caught / landed at', deltaLabel: y => 'Kick of ' + E.fmtYard(y), yardsLabel: 'Kick distance', quarter: ctx.quarter, field: true, onChange: rr }));
-      }
-      if (ev.result === 'return') {
-        body.append(playerPicker(g, Rt, ev, 'returner', { label: 'Returner', onChange: rr }));
-        body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; build(); }));
-        if (!ev.td) {
-          body.append(spotPicker(g, { ev, kMode: 'retMode', kSpot: 'endSpot', kYards: 'retYards', team: Rt, start: landing(), defaultSpot: landing(), label: 'Returned to', deltaLabel: y => 'Return of ' + E.fmtYard(y), yardsLabel: 'Return yards', quarter: ctx.quarter, onChange: rr }));
-          body.append(toggle('Fumbled on the return', !!(ev.fumble && ev.fumble.on), v => { ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v }); build(); }));
-          if (ev.fumble && ev.fumble.on) body.append(fumbleSection(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? landing() + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, landing())), quarter: ctx.quarter, onChange: rr }));
-        }
-      } else if (ev.result === 'oob') {
-        body.append(spotPicker(g, { ev, kMode: 'oobMode', kSpot: 'oobSpot', kYards: 'oobYards', team: Rt, start: landing(), defaultSpot: landing(), label: ab(g, Rt) + ' takes over at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-        body.append(h('div', { class: 'help' }, 'Enter wherever the officials place the ball.'));
-      } else if (ev.result === 'onside' || ev.result === 'muff') {
-        if (!ev.recTeam) ev.recTeam = K;
-        body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
-        body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: landing(), defaultSpot: landing(), label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-      }
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.fg = function (g, ctx, ev, body) {
-    const st = ctx.state, L = E.settingsOf(g).fieldLength;
-    if (!ev.team) ev.team = st.possession || 'home';
-    if (!ev.result) ev.result = 'good';
-    if (ev.kicker == null) ev.kicker = UI.lastPlayer[ev.team + ':kicker'] || '';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      const K = ev.team, Rt = E.opp(K);
-      const autoDist = Math.round(E.toGoal(K, st.spot, L) + 17);
-      body.replaceChildren();
-      if (st.phase !== 'play' || st.possession !== K) body.append(offenseSeg(g, ev, build));
-      body.append(playerPicker(g, K, ev, 'kicker', { label: 'Kicker', onChange: rr }));
-      body.append(field('Distance (yards)', h('div', { class: 'row' }, intField({ key: 'fgDistance', primary: true, label: 'Field goal distance', get: () => (ev.distance != null && ev.distance !== '' ? E.num(ev.distance, autoDist) : autoDist), set: v => { ev.distance = v; rr(); } }), h('span', { class: 'muted small' }, 'from the ' + E.fmtSpot(st.spot, g) + ': ' + E.fmtYard(E.toGoal(K, st.spot, L)) + ' to the goal + 17'))));
-      body.append(field('Result', seg({ options: [{ v: 'good', l: 'Good', cls: 'gold' }, { v: 'no_good', l: 'No good' }, { v: 'blocked', l: 'Blocked' }], value: ev.result, onChange: v => { ev.result = v; build(); } })));
-      if (ev.result === 'no_good') {
-        if (!ev.missResult) ev.missResult = 'touchback';
-        body.append(field(ab(g, Rt) + ' takes over', seg({ options: [{ v: 'touchback', l: 'Touchback' }, { v: 'los', l: 'At the spot of the kick' }, { v: 'spot', l: 'Other spot' }], value: ev.missResult, onChange: v => { ev.missResult = v; build(); } })));
-        if (ev.missResult === 'spot') body.append(spotPicker(g, { ev, kMode: 'missMode', kSpot: 'missSpot', kYards: 'missYards', team: Rt, start: st.spot, defaultSpot: st.spot, label: 'Ball placed at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-      } else if (ev.result === 'blocked') {
-        body.append(playerPicker(g, Rt, ev, 'blockedBy', { label: 'Blocked by', onChange: rr }));
-        if (!ev.recTeam) ev.recTeam = Rt;
-        body.append(field('Recovered by', teamSeg(g, ev.recTeam, v => { ev.recTeam = v; ev.recBy = ''; build(); })));
-        body.append(playerPicker(g, ev.recTeam, ev, 'recBy', { label: 'Recovering player', onChange: rr }));
-        body.append(spotPicker(g, { ev, kMode: 'recMode', kSpot: 'recSpot', kYards: 'recYards', team: K, start: st.spot, defaultSpot: st.spot, label: 'Recovered at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-        if (ev.recTeam === Rt) body.append(toggle('Returned for a touchdown', !!ev.td, v => { ev.td = v; rr(); }));
-      }
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.pat = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = st.possession || 'home';
-    if (!ev.kind) ev.kind = 'kick';
-    if (!ev.result) ev.result = 'good';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      const T = ev.team;
-      body.replaceChildren();
-      if (st.phase !== 'try') body.append(field('Scoring team', teamSeg(g, T, v => { ev.team = v; build(); })));
-      body.append(field('Try', seg({ options: [{ v: 'kick', l: 'Kick (' + E.settingsOf(g).ptsKick + ')' }, { v: 'run', l: 'Run (' + E.settingsOf(g).pts2pt + ')' }, { v: 'pass', l: 'Pass (' + E.settingsOf(g).pts2pt + ')' }], value: ev.kind, onChange: v => { ev.kind = v; if (ev.result === 'blocked' && v !== 'kick') ev.result = 'no_good'; build(); } })));
-      if (ev.kind === 'kick') { if (ev.kicker == null) ev.kicker = UI.lastPlayer[T + ':kicker'] || ''; body.append(playerPicker(g, T, ev, 'kicker', { label: 'Kicker', onChange: rr })); }
-      if (ev.kind === 'run') body.append(playerPicker(g, T, ev, 'carrier', { label: 'Ball carrier', onChange: rr }));
-      if (ev.kind === 'pass') { if (ev.passer == null) ev.passer = UI.lastPlayer[T + ':passer'] || ''; body.append(playerPicker(g, T, ev, 'passer', { label: 'Passer', onChange: rr })); body.append(playerPicker(g, T, ev, 'receiver', { label: 'Receiver', onChange: rr })); }
-      const opts = [{ v: 'good', l: 'Good', cls: 'gold' }, { v: 'no_good', l: ev.kind === 'kick' ? 'No good' : 'Failed' }];
-      if (ev.kind === 'kick') opts.push({ v: 'blocked', l: 'Blocked' });
-      body.append(field('Result', seg({ options: opts, value: ev.result, onChange: v => { ev.result = v; rr(); build(); } })));
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.penalty = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    const off = st.possession || 'home', def = E.opp(off);
-    if (!ev.against) ev.against = def;
-    if (ev.yards == null) ev.yards = 5;
-    if (!ev.status) ev.status = 'accepted';
-    if (!ev.from) ev.from = 'current';
-    if (!ev.downResult) ev.downResult = 'keep';
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    const lastPlay = st.snapshot ? E.dd(st.snapshot, g) : null;
-    const prevIdx = st.snapshotIndex;
-    const prevText = prevIdx >= 0 && R && R.derived[prevIdx] ? R.derived[prevIdx].text : '';
-    let showOverride = !!ev.override;
-    function build() {
-      body.replaceChildren();
-      const presets = h('div', { class: 'chips' });
-      E.PENALTY_PRESETS.forEach(p => presets.append(h('button', { type: 'button', class: 'chip' + (ev.name === p.name ? ' on' : ''), style: 'min-width:0;padding:4px 10px', onclick: () => {
-        ev.name = p.name; ev.yards = p.yards; ev.from = p.from; ev.downResult = p.down;
-        if (p.side === 'off') ev.against = off; else if (p.side === 'def') ev.against = def;
-        build();
-      } }, h('span', { style: 'font-size:13px;color:inherit;max-width:none;white-space:normal;text-align:center' }, p.name))));
-      body.append(field('Foul', presets));
-      body.append(field('Name', h('input', { type: 'text', value: ev.name || '', placeholder: 'Foul', oninput: e => { ev.name = e.target.value; rr(); } })));
-      body.append(field('Against', teamSeg(g, ev.against, v => { ev.against = v; ev.player = ''; build(); }, { home: ab(g, 'home') + (off === 'home' && st.phase === 'play' ? ' (offense)' : (st.phase === 'play' ? ' (defense)' : '')), away: ab(g, 'away') + (off === 'away' && st.phase === 'play' ? ' (offense)' : (st.phase === 'play' ? ' (defense)' : '')) })));
-      const yardsBtn = intField({ key: 'penaltyYards', primary: true, label: 'Penalty yards', get: () => E.num(ev.yards, 0), set: v => { ev.yards = v; yardSeg.setValue(v); rr(); } });
-      const yardSeg = seg({ options: [5, 10, 15].map(n => ({ v: n, l: n + ' yds' })), value: E.num(ev.yards, 0), onChange: v => { ev.yards = v; yardsBtn.refresh(); yardSeg.setValue(v); Keypad.touched(yardsBtn._numTarget); rr(); } });
-      body.append(field('Yards', h('div', { class: 'row' }, h('div', { class: 'grow' }, yardSeg), yardsBtn)));
-      body.append(field('Status', seg({ options: [{ v: 'accepted', l: 'Accepted' }, { v: 'declined', l: 'Declined' }, { v: 'offsetting', l: 'Offsetting' }], value: ev.status, onChange: v => { ev.status = v; build(); } })));
-      if (ev.status === 'accepted') {
-        body.append(field('Enforce from', seg({ options: [{ v: 'current', l: 'Where the ball is now' }, { v: 'previous', l: 'Previous spot' }], value: ev.from, onChange: v => { ev.from = v; build(); } })));
-        body.append(h('div', { class: 'help' }, ev.from === 'previous'
-          ? (lastPlay ? 'Wipes out the last play (' + prevText + ') and marks off from the ' + E.fmtSpot(st.snapshot.spot, g) + ' with ' + lastPlay + '.' : 'There is no play to wipe out, so this is enforced from where the ball is now.')
-          : 'The last play stands. Use this for dead-ball fouls (false start, offside, delay, late hits) and for fouls tacked on to the end of a play.'));
-        if (st.phase === 'play' || (ev.from === 'previous' && st.snapshot && st.snapshot.phase === 'play')) body.append(field('Down', seg({ options: [{ v: 'keep', l: ev.from === 'previous' ? 'Replay the down' : 'Same down' }, { v: 'auto', l: 'Automatic 1st down' }, { v: 'loss', l: 'Loss of down' }], value: ev.downResult, onChange: v => { ev.downResult = v; build(); } })));
-      } else if (ev.status === 'offsetting') body.append(h('div', { class: 'help' }, lastPlay ? 'Offsetting fouls: the last play is wiped out and the down is replayed from the ' + E.fmtSpot(st.snapshot.spot, g) + '.' : 'Offsetting fouls: no yardage, the down is replayed.'));
-      else body.append(h('div', { class: 'help' }, 'Declined: the play stands and nothing moves. Recorded in the log only.'));
-      body.append(playerPicker(g, ev.against, ev, 'player', { label: 'Player', hint: 'optional', onChange: rr }));
-      body.append(pv);
-      body.append(toggle('Adjust the result by hand', showOverride, v => { showOverride = v; if (!v) ev.override = null; else ev.override = ev.override || {}; build(); }));
-      if (showOverride) {
-        const o = ev.override = ev.override || {};
-        const poss = o.possession || (ev.from === 'previous' && st.snapshot ? st.snapshot.possession : st.possession) || 'home';
-        body.append(field('Possession', teamSeg(g, poss, v => { o.possession = v; build(); })));
-        body.append(spotPicker(g, { ev: o, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', key: 'overrideSpot', team: poss, start: st.spot, defaultSpot: st.spot, label: 'Ball placed at', deltaLabel: () => '', quarter: ctx.quarter, allowYards: false, onChange: rr }));
-        body.append(field('Down', seg({ options: [1, 2, 3, 4].map(n => ({ v: n, l: E.ordinal(n) })), value: E.num(o.down, null), onChange: v => { o.down = v; build(); } })));
-        const distBtn = intField({ key: 'overrideDistance', label: 'Distance to go', get: () => (o.distance === 'goal' || o.distance == null || o.distance === '' ? 10 : E.num(o.distance, 10)), format: v => (o.distance === 'goal' ? 'Goal' : (o.distance == null || o.distance === '' ? '—' : String(v))), set: v => { o.distance = v; goalBtn.classList.toggle('primary', false); rr(); } });
-        const goalBtn = h('button', { type: 'button', class: 'btn sm' + (o.distance === 'goal' ? ' primary' : ''), onclick: () => { o.distance = o.distance === 'goal' ? '' : 'goal'; build(); } }, 'Goal to go');
-        body.append(field('Distance', h('div', { class: 'row' }, distBtn, goalBtn)));
-        body.append(h('div', { class: 'help' }, 'Leave a field alone to keep the computed value.'));
-      }
-      body.append(optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.situation = function (g, ctx, ev, body) {
-    const st = ctx.state, L = E.settingsOf(g).fieldLength;
-    if (ev.possession == null) ev.possession = st.possession || 'home';
-    if (ev.phase == null) ev.phase = (st.phase === 'final' ? 'play' : (st.phase === 'free_kick' ? 'kickoff' : st.phase));
-    if (ev.spot == null) ev.spot = st.spot;
-    if (ev.down == null) ev.down = st.down;
-    if (ev.distance == null) ev.distance = st.lineToGain == null ? 10 : (Math.abs(st.lineToGain - E.goal(st.possession || 'home', L)) < 1e-9 ? 'goal' : Math.abs(st.lineToGain - st.spot));
-    if (ev.quarter == null) ev.quarter = st.quarter;
-    if (ev.homeScore == null) ev.homeScore = st.score.home;
-    if (ev.awayScore == null) ev.awayScore = st.score.away;
-    if (ev.homeTimeouts == null) ev.homeTimeouts = st.timeouts.home;
-    if (ev.awayTimeouts == null) ev.awayTimeouts = st.timeouts.away;
-    const pv = previewBox(g, ctx, ev);
-    const rr = () => pv.refresh();
-    function build() {
-      body.replaceChildren();
-      body.append(h('div', { class: 'help' }, 'Use this when the app and the field disagree. It sets the situation from here on; earlier plays are not changed.'));
-      body.append(field('What is next', seg({ options: [{ v: 'play', l: 'Scrimmage play' }, { v: 'kickoff', l: 'Kickoff' }, { v: 'try', l: 'PAT / 2-pt' }], value: ev.phase, onChange: v => { ev.phase = v; if (v === 'try') ev.spot = E.trySpot(ev.possession, g); if (v === 'kickoff') ev.spot = E.kickSpotFor(ev.possession, g, 'kickoff'); build(); } })));
-      body.append(field(ev.phase === 'kickoff' ? 'Kicking team' : 'Ball', teamSeg(g, ev.possession, v => { ev.possession = v; if (ev.phase === 'try') ev.spot = E.trySpot(v, g); if (ev.phase === 'kickoff') ev.spot = E.kickSpotFor(v, g, 'kickoff'); build(); })));
-      body.append(spotPicker(g, { ev, kMode: 'spotMode', kSpot: 'spot', kYards: 'spotYards', key: 'situationSpot', team: ev.possession, start: E.num(ev.spot, st.spot), defaultSpot: E.num(ev.spot, st.spot), primary: true, label: ev.phase === 'kickoff' ? 'Kick from' : 'Ball at', deltaLabel: () => '', quarter: E.num(ev.quarter, st.quarter), field: true, allowYards: false, onChange: rr }));
-      if (ev.phase === 'play') {
-        body.append(field('Down', seg({ options: [1, 2, 3, 4].map(n => ({ v: n, l: E.ordinal(n) })), value: E.num(ev.down, 1), onChange: v => { ev.down = v; build(); } })));
-        const distBtn = intField({ key: 'situationDistance', label: 'Distance to go', get: () => (ev.distance === 'goal' ? 10 : E.num(ev.distance, 10)), format: v => (ev.distance === 'goal' ? 'Goal' : String(v)), set: v => { ev.distance = v; goalBtn.classList.remove('primary'); rr(); } });
-        const goalBtn = h('button', { type: 'button', class: 'btn sm' + (ev.distance === 'goal' ? ' primary' : ''), onclick: () => { ev.distance = ev.distance === 'goal' ? 10 : 'goal'; build(); } }, 'Goal to go');
-        body.append(field('Distance', h('div', { class: 'row' }, distBtn, goalBtn)));
-      }
-      body.append(field('Quarter', seg({ options: [1, 2, 3, 4, 5].map(n => ({ v: n, l: n === 5 ? 'OT' : 'Q' + n })), value: E.num(ev.quarter, 1), onChange: v => { ev.quarter = v; build(); } })));
-      body.append(field('Score', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), intField({ key: 'homeScore', label: ab(g, 'home') + ' score', max: 199, get: () => E.num(ev.homeScore, 0), set: v => { ev.homeScore = v; rr(); } }), h('span', { class: 'muted' }, ab(g, 'away')), intField({ key: 'awayScore', label: ab(g, 'away') + ' score', max: 199, get: () => E.num(ev.awayScore, 0), set: v => { ev.awayScore = v; rr(); } }))));
-      body.append(field('Timeouts left', h('div', { class: 'row' }, h('span', { class: 'muted' }, ab(g, 'home')), intField({ key: 'homeTimeouts', label: ab(g, 'home') + ' timeouts', max: 9, get: () => E.num(ev.homeTimeouts, 0), set: v => { ev.homeTimeouts = v; rr(); } }), h('span', { class: 'muted' }, ab(g, 'away')), intField({ key: 'awayTimeouts', label: ab(g, 'away') + ' timeouts', max: 9, get: () => E.num(ev.awayTimeouts, 0), set: v => { ev.awayTimeouts = v; rr(); } }))));
-      body.append(pv, optionsBlock(ev));
-      rr();
-    }
-    build();
-  };
-
-  forms.timeout = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = st.possession || 'home';
-    body.append(field('Timeout by', teamSeg(g, ev.team, v => { ev.team = v; body.replaceChildren(); forms.timeout(g, ctx, ev, body); })));
-    body.append(h('div', { class: 'help' }, ab(g, 'home') + ' has ' + st.timeouts.home + ' left · ' + ab(g, 'away') + ' has ' + st.timeouts.away + ' left'));
-    body.append(optionsBlock(ev));
-  };
-  forms.safety = function (g, ctx, ev, body) {
-    const st = ctx.state;
-    if (!ev.team) ev.team = E.opp(st.possession || 'home');
-    body.append(field('2 points to', teamSeg(g, ev.team, v => { ev.team = v; body.replaceChildren(); forms.safety(g, ctx, ev, body); })));
-    body.append(h('div', { class: 'help' }, 'For a safety that happened on a run or a sack, enter the play itself and pick Safety as its result so the tackle counts. Use this when the safety came some other way (a penalty in the end zone, a blocked punt out of the end zone).'));
-    body.append(optionsBlock(ev));
-  };
-  forms.note = function (g, ctx, ev, body) {
-    body.append(field('Note', h('input', { type: 'text', value: ev.text || '', placeholder: 'Injury timeout, lightning delay, …', oninput: e => { ev.text = e.target.value; } })));
-  };
-
-  const TITLES = { rush: 'Run', pass: 'Pass', punt: 'Punt', kickoff: 'Kickoff', fg: 'Field goal', pat: 'PAT / 2-point try', penalty: 'Penalty', situation: 'Set the situation', timeout: 'Timeout', safety: 'Safety', note: 'Note', period_end: 'End of quarter', game_end: 'End of game' };
-
-  // open a form for a new event (appended), an edit (index) or an insert (insertAt)
-  function openForm(type, o) {
-    o = o || {};
-    const g = game(); if (!g) return;
-    let ev, index = null, insertAt = null;
-    if (o.index != null) { index = o.index; ev = E.clone(g.events[index]); }
-    else { ev = Object.assign({ type }, o.preset || {}); if (o.insertAt != null) insertAt = o.insertAt; }
-    const at = index != null ? index : (insertAt != null ? insertAt : g.events.length);
-    const state = at >= g.events.length ? R.final : E.stateBefore(g, at);
-    const ctx = { state, index: at, quarter: state.quarter };
-    const title = (index != null ? 'Edit: ' : (insertAt != null ? 'Insert: ' : '')) + (o.title || TITLES[type] || type);
-    openSheet({
-      title, ctx: E.dd(state, g) + ' · Q' + state.quarter, modal: true,
-      saveLabel: index != null ? 'Save changes' : 'Add to log',
-      build: body => { forms[type](g, ctx, ev, body); },
-      onSave: () => {
-        const v = validate(ev);
-        if (v) return { error: v };
-        commit(gg => { if (index != null) gg.events[index] = ev; else if (insertAt != null) gg.events.splice(insertAt, 0, ev); else gg.events.push(ev); }, index != null ? 'Play updated — everything after it recomputed' : null);
-      }
-    });
-  }
-  function validate(ev) {
-    if (ev.type === 'penalty' && ev.status === 'accepted' && !(E.num(ev.yards, 0) >= 0)) return 'Enter the penalty yards.';
-    return null;
+  // result of appending a draft event: new down & distance, sentence, score change
+  function previewFor(g, ctx, ev) {
+    try {
+      const events = (g.events || []).slice(0, ctx.index == null ? g.events.length : ctx.index);
+      events.push(ev);
+      const RR = E.replay(Object.assign({}, g, { events }));
+      const d = RR.derived[RR.derived.length - 1];
+      const scoreTxt = (d.after.score.home !== ctx.state.score.home || d.after.score.away !== ctx.state.score.away) ? ab(g, 'home') + ' ' + d.after.score.home + ' – ' + ab(g, 'away') + ' ' + d.after.score.away : '';
+      return { dd: E.dd(d.after, g), text: d.text + (d.flags.halfDistance ? ' · half the distance applied' : '') + (d.flags.error ? ' · ' + d.flags.error : ''), scoreTxt, after: d.after };
+    } catch (e) { return { dd: '', text: String(e), scoreTxt: '' }; }
   }
 
   /* ---------- files: lazy libraries and saving ---------- */
@@ -2082,9 +1528,673 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return { status: 'saved' };
   }
 
-  window.CC = { h, $, esc, toast, DB, UI, load, save, game, recompute, getR: () => R, commit, undo, ab, roster, pname, shortName, fieldSVG, fieldCaption, openSheet, closeSheet, seg, field, toggle, numberInput, teamSeg, playerPicker, spotPicker, numField, Keypad, forms, openForm, TITLES, loadScript, saveFile, inViewer };
+  window.CC = { h, $, esc, toast, DB, UI, load, save, game, recompute, getR: () => R, commit, undo, ab, roster, pname, shortName, fieldSVG, fieldCaption, openSheet, closeSheet, seg, field, toggle, numberInput, teamSeg, previewFor, loadScript, saveFile, inViewer };
   // render is provided by app-views.js
   function render() { if (window.CC.render) window.CC.render(); }
+})();
+
+/* Chain Crew UI — play entry as a step-by-step wizard.
+   One question per full-screen step, big targets, auto-advance on a single choice, breadcrumbs to
+   jump back, and the app's own keypad for numbers. A step is rendered once; typing only updates
+   text, so nothing shifts or scrolls under the thumb. */
+(function () {
+  'use strict';
+  const E = window.Engine, C = window.CC;
+  const { h, toast, UI, ab, roster, pname, fieldSVG, previewFor, commit } = C;
+  const game = C.game, getR = C.getR;
+
+  /* ---------- keypad (per step) ---------- */
+  // t: {kind:'yardline'|'yards'|'int'|'jersey', get, set, max, mid, onDone}
+  function makeKeypad(t) {
+    const el = h('div', { class: 'kp-keys' });
+    let buf = '', fresh = true, neg = false;
+    const maxv = t.max == null ? 999 : t.max;
+    const maxDigits = String(Math.floor(Math.abs(maxv))).length;
+    const alt = h('button', { type: 'button', class: 'kp-key alt', onclick: () => press('alt') }, '');
+    const key = (label, k, cls) => h('button', { type: 'button', class: 'kp-key' + (cls ? ' ' + cls : ''), 'data-k': k, onclick: () => press(k) }, label);
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(d => el.append(key(d, d)));
+    alt.setAttribute('data-k', 'alt');
+    el.append(alt, key('0', '0'), key('⌫', 'bs', 'bs'));
+    el.addEventListener('pointerdown', e => e.preventDefault());
+    function paintAlt() {
+      alt.disabled = false; alt.classList.remove('go');
+      if (t.kind === 'yards') alt.textContent = '±';
+      else if (t.kind === 'jersey') { alt.textContent = buf ? 'Add #' + buf : 'Add'; alt.classList.toggle('go', !!buf); alt.disabled = !buf; }
+      else if (t.kind === 'yardline') alt.textContent = String(t.mid != null ? t.mid : 50);
+      else { alt.textContent = ''; alt.disabled = true; }
+    }
+    function apply() {
+      if (t.kind === 'jersey') { if (t.onChange) t.onChange(buf); paintAlt(); return; }
+      let v = Number(buf || 0);
+      if (t.kind === 'yards' && neg) v = -v;
+      if (t.max != null) v = Math.min(v, t.max);
+      if (t.min != null) v = Math.max(v, t.min);
+      t.set(v); paintAlt();
+    }
+    function press(k) {
+      if (k === 'bs') { buf = fresh ? '' : buf.slice(0, -1); fresh = false; apply(); return; }
+      if (k === 'alt') {
+        if (t.kind === 'yards') { if (fresh) { buf = String(Math.abs(Number(t.get()) || 0)); fresh = false; } neg = !neg; apply(); }
+        else if (t.kind === 'jersey') { const v = buf; if (!v) return; buf = ''; fresh = true; paintAlt(); if (t.onDone) t.onDone(v); }
+        else if (t.kind === 'yardline') { buf = String(t.mid != null ? t.mid : 50); fresh = true; apply(); }
+        return;
+      }
+      if (fresh) { buf = k; fresh = false; if (t.kind === 'yards') neg = false; }
+      else { let nb = buf + k; if (nb.length > maxDigits || Number(nb) > maxv) nb = k; buf = nb; }
+      apply();
+      if (buf.length >= maxDigits) fresh = true;
+    }
+    paintAlt();
+    return { el, reset() { buf = ''; fresh = true; neg = t.kind === 'yards' && Number(t.get()) < 0; paintAlt(); } };
+  }
+
+  /* ---------- wizard shell ---------- */
+  let wiz = null;
+  function closeWizard() { if (wiz) { wiz.root.remove(); wiz = null; } }
+  function openWizard(o) {
+    // o: {title, ev, ctx, flow(g, ev, ctx) → steps, onSave(ev) → {error}|undefined, saveLabel, startAtLast}
+    closeWizard(); C.closeSheet();
+    const g = game(), ev = o.ev, ctx = o.ctx;
+    const root = h('div', { class: 'wiz', role: 'dialog', 'aria-modal': 'true' });
+    const backBtn = h('button', { type: 'button', class: 'wiz-back', onclick: () => api.back() }, '‹ Back');
+    const title = h('div', { class: 'wiz-title' }, o.title);
+    const cancel = h('button', { type: 'button', class: 'wiz-cancel', onclick: closeWizard }, 'Cancel');
+    const strip = h('div', { class: 'wiz-strip' });
+    const q = h('h2', { class: 'wiz-q' });
+    const body = h('div', { class: 'wiz-body' });
+    const foot = h('div', { class: 'wiz-foot' });
+    root.append(h('div', { class: 'wiz-head' }, backBtn, title, cancel), strip, q, body, foot);
+    document.body.append(root);
+    let steps = [], cur = null;
+    const visited = new Set();
+    const compute = () => { steps = o.flow(g, ev, ctx); };
+    const idxOf = id => steps.findIndex(s => s.id === id);
+    const skipped = s => !!(s.skip && s.skip());
+    const api = {
+      g, ev, ctx,
+      preview: () => previewFor(g, ctx, ev),
+      next() { compute(); const i = idxOf(cur.id); for (let j = i + 1; j < steps.length; j++) if (!skipped(steps[j])) { cur = steps[j]; render(); return; } if (i < steps.length - 1) { cur = steps[steps.length - 1]; } render(); },
+      back() { compute(); const i = idxOf(cur.id); if (i <= 0) { closeWizard(); return; } cur = steps[i - 1]; render(); },
+      goto(id) { compute(); const s = steps.find(x => x.id === id); if (s) { cur = s; render(); } },
+      refresh() { compute(); cur = (cur && steps.find(x => x.id === cur.id)) || steps[0]; renderStrip(); renderFoot(); },
+      rerender() { render(); },
+      isLast() { compute(); return idxOf(cur.id) === steps.length - 1; },
+      finish() { const r = o.onSave(ev); if (r && r.error) { toast(r.error); return; } closeWizard(); }
+    };
+    function renderStrip() {
+      strip.replaceChildren();
+      const i = idxOf(cur.id);
+      steps.forEach((s, j) => {
+        if (j === i) return;
+        if (j > i && !visited.has(s.id)) return;
+        const val = s.summary ? s.summary() : '';
+        strip.append(h('button', { type: 'button', class: 'crumb' + (j > i ? ' future' : ''), onclick: () => api.goto(s.id) }, h('span', { class: 'cl' }, s.label || ''), h('span', { class: 'cv' }, val || '—')));
+      });
+      strip.hidden = !strip.children.length;
+    }
+    function renderFoot() {
+      foot.replaceChildren();
+      const last = idxOf(cur.id) === steps.length - 1;
+      const valid = cur.valid ? cur.valid() : true;
+      if (last) {
+        if (valid) { const p = api.preview(); foot.append(h('div', { class: 'wiz-preview' }, h('div', { class: 'big num' }, p.dd + (p.scoreTxt ? '  ·  ' + p.scoreTxt : '')), h('div', { class: 'small muted' }, p.text))); }
+        foot.append(h('button', { type: 'button', class: 'btn primary big', disabled: !valid, onclick: () => api.finish() }, o.saveLabel || 'Add to log'));
+      } else {
+        const empty = cur.optional && !(cur.hasValue && cur.hasValue());
+        foot.append(h('button', { type: 'button', class: 'btn big ' + (empty ? 'ghost' : 'primary'), disabled: !valid && !empty, onclick: () => api.next() }, empty ? (cur.skipLabel || 'Skip') : 'Next'));
+      }
+    }
+    function render() {
+      compute();
+      cur = (cur && steps.find(x => x.id === cur.id)) || steps[0];
+      const i = idxOf(cur.id);
+      visited.add(cur.id);
+      backBtn.textContent = i === 0 ? '✕' : '‹ Back';
+      q.textContent = cur.q || '';
+      body.replaceChildren(); body.scrollTop = 0;
+      cur.render(body, api);
+      renderStrip(); renderFoot();
+    }
+    compute();
+    if (o.startAtLast) steps.forEach(s => visited.add(s.id));
+    cur = o.startAtLast ? steps[steps.length - 1] : (steps.find(s => !skipped(s)) || steps[0]);
+    render();
+    wiz = { root, api };
+    return api;
+  }
+
+  /* ---------- step builders ---------- */
+  function chipEl(num, name, on, onclick) {
+    return h('button', { type: 'button', class: 'pchip' + (on ? ' on' : ''), onclick }, h('b', null, '#' + num), h('span', null, name || ' '));
+  }
+  function jerseyPad(body, g, team, onPick, onBack) {
+    body.replaceChildren();
+    const read = h('div', { class: 'kp-big num' }, '#');
+    const kp = makeKeypad({ kind: 'jersey', max: 99, get: () => '', set: () => {}, onChange: b => { read.textContent = '#' + b; }, onDone: onPick });
+    body.append(h('div', { class: 'help' }, ab(g, team) + ' jersey number, then Add'), read, kp.el, h('button', { type: 'button', class: 'btn ghost', onclick: onBack }, 'Back to the roster'));
+  }
+  // o: {id, q, label, team, ev, key, multi, max, optional, skip, hint, skipLabel}
+  function playerStep(o) {
+    const ev = o.ev;
+    const cur = () => o.multi ? (Array.isArray(ev[o.key]) ? ev[o.key] : []) : (ev[o.key] || '');
+    const has = () => o.multi ? cur().length > 0 : !!cur();
+    const sel = n => o.multi ? cur().map(String).includes(String(n)) : String(cur()) === String(n);
+    return {
+      id: o.id, q: o.q, label: o.label || o.q, optional: o.optional, skip: o.skip, hasValue: has, skipLabel: o.skipLabel,
+      valid: () => !!o.optional || has(),
+      summary: () => { const g = game(); const v = o.multi ? cur() : (cur() ? [cur()] : []); return v.map(n => pname(g, o.team, n)).join(', ') || (o.optional ? 'none' : ''); },
+      render(body, api) {
+        const g = api.g;
+        const grid = h('div', { class: 'pgrid' });
+        const hint = h('div', { class: 'help' }, o.hint || (o.multi ? 'Tap up to ' + (o.max || 2) + '; two players each get an assist.' : (o.optional ? 'Optional.' : '')));
+        const choose = n => {
+          n = String(n).replace(/^0+(?=\d)/, '');
+          if (o.multi) { let a = cur().map(String); if (a.includes(n)) a = a.filter(x => x !== n); else { a.push(n); if (o.max && a.length > o.max) a.shift(); } ev[o.key] = a; draw(); api.refresh(); }
+          else { ev[o.key] = sel(n) && api.isLast() ? '' : n; if (ev[o.key]) UI.lastPlayer[o.team + ':' + o.key] = ev[o.key]; if (api.isLast()) { draw(); api.refresh(); } else api.next(); }
+        };
+        const draw = () => {
+          grid.replaceChildren();
+          const nums = roster(g, o.team).map(p => String(p.num));
+          roster(g, o.team).forEach(p => grid.append(chipEl(p.num, p.name || p.pos, sel(p.num), () => choose(p.num))));
+          const vals = o.multi ? cur().map(String) : (cur() ? [String(cur())] : []);
+          vals.forEach(n => { if (!nums.includes(n)) grid.append(chipEl(n, 'added', true, () => choose(n))); });
+          grid.append(h('button', { type: 'button', class: 'pchip other', onclick: () => jerseyPad(body, g, o.team, v => { body.replaceChildren(hint, grid); choose(v); }, () => { body.replaceChildren(hint, grid); draw(); }) }, h('b', null, 'other #'), h('span', null, 'type a number')));
+        };
+        draw();
+        body.append(hint, grid);
+        if (!roster(g, o.team).length) body.append(h('div', { class: 'help' }, 'No roster for ' + g.teams[o.team].name + ' yet: tap "other #" and type the jersey number, or add the roster under More.'));
+      }
+    };
+  }
+  // o: {id, q, label, options:[{v,l,sub,cls}], get, set, cols}
+  function choiceStep(o) {
+    return {
+      id: o.id, q: o.q, label: o.label || o.q,
+      valid: () => o.get() != null && o.get() !== '',
+      summary: () => { const x = o.options.find(x => x.v === o.get()); return x ? x.l : ''; },
+      render(body, api) {
+        const grid = h('div', { class: 'choices' + (o.cols === 1 ? ' one' : '') });
+        o.options.forEach(x => grid.append(h('button', { type: 'button', class: 'choice' + (x.v === o.get() ? ' on' : '') + (x.cls ? ' ' + x.cls : ''), onclick: () => { o.set(x.v); if (api.isLast()) api.rerender(); else api.next(); } }, h('b', null, x.l), x.sub ? h('span', null, x.sub) : null)));
+        body.append(grid);
+        if (o.help) body.append(h('div', { class: 'help' }, o.help));
+      }
+    };
+  }
+  // team toggle + optional player grid; o: {id, q, label, ev, kTeam, kPlayer, defaultTeam, teams:{home,away}, onTeam}
+  function teamPlayerStep(o) {
+    const ev = o.ev;
+    return {
+      id: o.id, q: o.q, label: o.label || o.q, optional: true, hasValue: () => !!ev[o.kPlayer], skipLabel: 'Next (no player)',
+      valid: () => true,
+      summary: () => { const g = game(); const t = ev[o.kTeam] || o.defaultTeam; return ab(g, t) + (ev[o.kPlayer] ? ' ' + pname(g, t, ev[o.kPlayer]) : ''); },
+      render(body, api) {
+        if (!ev[o.kTeam]) ev[o.kTeam] = o.defaultTeam;
+        const g = api.g;
+        const tog = h('div', { class: 'bigseg' });
+        const grid = h('div', { class: 'pgrid' });
+        const lbl = h('div', { class: 'lbl' }, 'Player (optional)');
+        const pick = n => { ev[o.kPlayer] = String(n).replace(/^0+(?=\d)/, ''); if (api.isLast()) { draw(); api.refresh(); } else api.next(); };
+        const draw = () => {
+          tog.replaceChildren(...['home', 'away'].map(t => h('button', { type: 'button', class: ev[o.kTeam] === t ? 'on' : '', onclick: () => { if (ev[o.kTeam] !== t) { ev[o.kTeam] = t; ev[o.kPlayer] = ''; if (o.onTeam) o.onTeam(t); draw(); api.refresh(); } } }, (o.teams && o.teams[t]) || ab(g, t))));
+          grid.replaceChildren();
+          const T = ev[o.kTeam];
+          roster(g, T).forEach(p => grid.append(chipEl(p.num, p.name || p.pos, String(ev[o.kPlayer]) === String(p.num), () => pick(p.num))));
+          if (ev[o.kPlayer] && !roster(g, T).some(p => String(p.num) === String(ev[o.kPlayer]))) grid.append(chipEl(ev[o.kPlayer], 'added', true, () => pick(ev[o.kPlayer])));
+          grid.append(h('button', { type: 'button', class: 'pchip other', onclick: () => jerseyPad(body, g, T, v => { body.replaceChildren(tog, lbl, grid); pick(v); }, () => { body.replaceChildren(tog, lbl, grid); draw(); }) }, h('b', null, 'other #'), h('span', null, 'type a number')));
+        };
+        draw();
+        body.append(tog, lbl, grid);
+      }
+    };
+  }
+  // yard-line entry with keypad, field tap, steppers and result shortcuts
+  // o: {id, q, label, ev, kSpot, kMode, kYards, team, start, defaultSpot, deltaLabel, yardsLabel, lineToGain, quarter, field, allowYards,
+  //     shortcuts:[{v,l,cls}], ends:[v...], getEnd(), setEnd(v)}
+  function spotStep(o) {
+    const ev = o.ev, kMode = o.kMode || 'mode', kSpot = o.kSpot, kYards = o.kYards || (kSpot + 'Yards');
+    const L = () => E.settingsOf(game()).fieldLength;
+    const init = () => {
+      if (!ev[kMode]) ev[kMode] = 'spot';
+      if (ev[kMode] === 'spot' && (ev[kSpot] == null || ev[kSpot] === '')) ev[kSpot] = o.defaultSpot != null ? o.defaultSpot : o.start;
+      if (ev[kMode] === 'yards' && (ev[kYards] == null || ev[kYards] === '')) ev[kYards] = 0;
+    };
+    const abs = () => ev[kMode] === 'yards' ? E.clamp(o.start + E.num(ev[kYards], 0) * E.dir(o.team), 0, L()) : E.clamp(E.num(ev[kSpot], o.start), 0, L());
+    const yds = () => ev[kMode] === 'yards' ? E.num(ev[kYards], 0) : E.gain(o.team, o.start, abs());
+    const dl = o.deltaLabel || (y => y > 0 ? 'Gain of ' + E.fmtYard(y) : y < 0 ? 'Loss of ' + E.fmtYard(-y) : 'No gain');
+    const endVal = () => (o.getEnd ? o.getEnd() : '') || '';
+    const ended = () => !!(o.ends && o.ends.includes(endVal()));
+    const curSide = () => { const q = E.spotParts(abs(), L()); return q.side === 'mid' ? E.opp(o.team) : q.side; };
+    const curYard = () => E.spotParts(abs(), L()).yard;
+    return {
+      id: o.id, q: o.q, label: o.label || o.q,
+      valid: () => true,
+      summary: () => { init(); if (ended()) { const s = (o.shortcuts || []).find(x => x.v === endVal()); return s ? s.l : String(endVal()); } const d = dl(yds()); return E.fmtSpot(abs(), game()) + (d ? ' · ' + d : ''); },
+      render(body, api) {
+        init();
+        const g = api.g, len = L();
+        const sideBtns = h('div', { class: 'bigseg' });
+        const yard = h('div', { class: 'yard num' });
+        const delta = h('div', { class: 'delta' });
+        const ddLine = h('div', { class: 'dd' });
+        const readRight = h('div', { class: 'spot-right' }, ddLine);
+        const read = h('div', { class: 'spot-read' }, h('div', null, yard, delta), readRight);
+        const area = h('div', { class: 'stack' });
+        const endedBox = h('div', { class: 'ended', hidden: true });
+        let fieldEl = null, kp = null;
+        const refreshText = () => {
+          const y = yds(), d = dl(y);
+          yard.textContent = E.fmtSpot(abs(), g);
+          delta.textContent = d; delta.className = 'delta' + (y < 0 ? ' neg' : '');
+          const p = api.preview(); ddLine.textContent = p.dd ? '→ ' + p.dd : '';
+          Array.from(sideBtns.children).forEach(b => b.classList.toggle('on', b.dataset.side === curSide()));
+          if (fieldEl) fieldEl.setMarker(abs());
+          const e = endVal();
+          Array.from(body.querySelectorAll('.shortcuts button')).forEach(b => b.classList.toggle('on', b.dataset.v === String(e)));
+          area.hidden = ended(); endedBox.hidden = !ended();
+          if (ended()) { const s = (o.shortcuts || []).find(x => x.v === endVal()); endedBox.textContent = s ? s.l.toUpperCase() : ''; }
+          api.refresh();
+        };
+        const external = () => { if (kp) kp.reset(); refreshText(); };
+        ['home', 'away'].forEach(t => sideBtns.append(h('button', { type: 'button', 'data-side': t, onclick: () => { ev[kMode] = 'spot'; ev[kSpot] = E.absFrom(t, curYard(), len); external(); } }, ab(g, t) + (t === o.team ? ' (own)' : ''))));
+        const buildArea = () => {
+          area.replaceChildren();
+          if (ev[kMode] === 'spot') {
+            kp = makeKeypad({ kind: 'yardline', max: len / 2, mid: len / 2, get: curYard, set: y => { ev[kSpot] = E.absFrom(curSide(), E.clamp(y, 0, len / 2), len); refreshText(); } });
+            area.append(sideBtns);
+          } else {
+            kp = makeKeypad({ kind: 'yards', max: 99, get: () => E.num(ev[kYards], 0), set: v => { ev[kYards] = v; refreshText(); } });
+          }
+          area.append(read);
+          if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: o.start, lineToGain: o.lineToGain, marker: abs(), team: o.team, onPick: a => { ev[kMode] = 'spot'; ev[kSpot] = a; if (!sideBtns.isConnected) { buildArea(); } external(); }, compact: true }); area.append(fieldEl); }
+          area.append(h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { if (ev[kMode] === 'yards') ev[kYards] = E.num(ev[kYards], 0) + n; else ev[kSpot] = E.clamp(abs() + n * E.dir(o.team), 0, len); external(); } }, (n > 0 ? '+' : '') + n))));
+          area.append(kp.el);
+          readRight.replaceChildren(ddLine);
+          if (o.allowYards) readRight.append(h('button', { type: 'button', class: 'linkbtn', onclick: () => { if (ev[kMode] === 'spot') { ev[kYards] = yds(); ev[kMode] = 'yards'; } else { ev[kSpot] = abs(); ev[kMode] = 'spot'; } buildArea(); external(); } }, ev[kMode] === 'spot' ? 'Type ' + (o.yardsLabel || 'yards gained').toLowerCase() + ' instead' : 'Type the yard line instead'));
+        };
+        buildArea();
+        body.append(area, endedBox);
+        if (o.shortcuts && o.shortcuts.length) {
+          const sc = h('div', { class: 'shortcuts' });
+          o.shortcuts.forEach(x => sc.append(h('button', { type: 'button', 'data-v': String(x.v), class: x.cls || '', onclick: () => { o.setEnd(endVal() === x.v ? '' : x.v); refreshText(); } }, x.l)));
+          body.append(sc);
+        }
+        refreshText();
+      }
+    };
+  }
+  // read-only step (spike, notes)
+  function infoStep(o) { return { id: o.id, q: o.q, label: o.label || o.q, valid: () => true, summary: () => o.summary || '', render(body) { body.append(h('div', { class: 'help' }, o.text)); } }; }
+  function offenseStep(ev, q, g) {
+    return choiceStep({ id: 'offense', q: q || 'Which team has the ball?', label: 'Offense', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name })), get: () => ev.team, set: v => { ev.team = v; } });
+  }
+  // fumble sub-steps; writes ev[key] = {on, forcedBy, recTeam, recBy, recSpot, retSpot, td}
+  function fumbleSteps(g, ev, key, o) {
+    const f = ev[key] = (ev[key] && typeof ev[key] === 'object') ? ev[key] : {};
+    if (f.on == null) f.on = true;
+    if (!f.recTeam) f.recTeam = E.opp(o.team);
+    const start = o.start();
+    const steps = [
+      playerStep({ id: key + 'Forced', q: 'Who forced the fumble?', label: 'Forced by', team: E.opp(o.team), ev: f, key: 'forcedBy', optional: true }),
+      teamPlayerStep({ id: key + 'Rec', q: 'Who recovered it?', label: 'Recovered by', ev: f, kTeam: 'recTeam', kPlayer: 'recBy', defaultTeam: E.opp(o.team), teams: { [o.team]: ab(g, o.team) + ' (offense)', [E.opp(o.team)]: ab(g, E.opp(o.team)) + ' (defense)' }, onTeam: () => { f.td = false; f.retSpot = ''; } }),
+      spotStep({ id: key + 'Spot', q: 'Recovered where?', label: 'Recovered at', ev: f, kSpot: 'recSpot', kMode: 'recMode', team: f.recTeam, start, defaultSpot: start, deltaLabel: () => '', quarter: o.quarter, field: true })
+    ];
+    if (f.recTeam !== o.team) {
+      const rs = E.num(f.recSpot, start);
+      steps.push(spotStep({ id: key + 'Ret', q: 'Returned to?', label: 'Returned to', ev: f, kSpot: 'retSpot', kMode: 'retMode', team: f.recTeam, start: rs, defaultSpot: rs, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', quarter: o.quarter, field: true, shortcuts: [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }], ends: ['td'], getEnd: () => (f.td ? 'td' : ''), setEnd: v => { f.td = v === 'td'; } }));
+    }
+    return steps;
+  }
+
+  window.CC.Wizard = { openWizard, closeWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps, chipEl };
+})();
+
+/* Chain Crew UI — the question sequence for each play type, built on the wizard. */
+(function () {
+  'use strict';
+  const E = window.Engine, C = window.CC, W = C.Wizard;
+  const { h, toast, UI, ab, pname, commit } = C;
+  const { openWizard, makeKeypad, playerStep, choiceStep, teamPlayerStep, spotStep, infoStep, offenseStep, fumbleSteps } = W;
+  const game = C.game, getR = C.getR;
+
+  const flows = {};
+  const notPlay = (st, team) => st.phase !== 'play' || st.possession !== team;
+  const fumbleStart = (ev, st, team) => () => (ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.yards, 0) * E.dir(team), 0, E.settingsOf(game()).fieldLength) : E.num(ev.endSpot, st.spot));
+
+  flows.rush = (g, ev, ctx) => {
+    const st = ctx.state, steps = [];
+    if (!ev.team) ev.team = st.possession || 'home';
+    if (!ev.result) ev.result = 'tackled';
+    if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team has the ball?', g));
+    const team = ev.team, def = E.opp(team);
+    steps.push(playerStep({ id: 'carrier', q: ev.kneel ? 'Who took the knee?' : 'Who ran the ball?', label: 'Carrier', team, ev, key: 'carrier', optional: true, skipLabel: 'Skip (unknown)' }));
+    steps.push(spotStep({ id: 'spot', q: ev.kneel ? 'Where was the ball spotted?' : 'Where was he tackled?', label: 'Down at', ev, kSpot: 'endSpot', kMode: 'mode', kYards: 'yards', team, start: st.spot, lineToGain: st.lineToGain, quarter: ctx.quarter, field: true, allowYards: true,
+      shortcuts: ev.kneel ? [] : [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'oob', l: 'Out of bounds' }, { v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], ends: ['td', 'safety'],
+      getEnd: () => (['td', 'oob', 'fumble', 'safety'].includes(ev.result) ? ev.result : ''), setEnd: v => { ev.result = v || 'tackled'; } }));
+    if (ev.result === 'fumble') steps.push(...fumbleSteps(g, ev, 'fumble', { team, start: fumbleStart(ev, st, team), quarter: ctx.quarter }));
+    else if (ev.result !== 'td' && !ev.kneel) steps.push(playerStep({ id: 'tacklers', q: 'Who made the tackle?', label: 'Tackle by', team: def, ev, key: 'tacklers', multi: true, max: 2, optional: true }));
+    return steps;
+  };
+
+  flows.pass = (g, ev, ctx) => {
+    const st = ctx.state, steps = [];
+    if (!ev.team) ev.team = st.possession || 'home';
+    if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team has the ball?', g));
+    const team = ev.team, def = E.opp(team);
+    if (ev.passer == null) ev.passer = UI.lastPlayer[team + ':passer'] || '';
+    steps.push(playerStep({ id: 'passer', q: 'Who threw it?', label: 'Passer', team, ev, key: 'passer', optional: true, skip: () => !!ev.passer }));
+    if (ev.spike) { steps.push(infoStep({ id: 'spike', q: 'Spike', label: 'Play', summary: 'Spike', text: 'Clock-stopping spike: an incomplete pass with no target. Add it to the log.' })); return steps; }
+    steps.push(choiceStep({ id: 'passResult', q: 'What happened?', label: 'Result', options: [{ v: 'complete', l: 'Complete' }, { v: 'incomplete', l: 'Incomplete' }, { v: 'intercepted', l: 'Intercepted' }, { v: 'sack', l: 'Sack' }], get: () => ev.result, set: v => { ev.result = v; ev.td = false; ev.safety = false; if (ev.fumble) ev.fumble.on = false; } }));
+    const fumbleOn = () => !!(ev.fumble && ev.fumble.on);
+    if (ev.result === 'complete') {
+      steps.push(playerStep({ id: 'receiver', q: 'Who caught it?', label: 'Receiver', team, ev, key: 'receiver', optional: true }));
+      steps.push(spotStep({ id: 'spot', q: 'Where was he tackled?', label: 'Down at', ev, kSpot: 'endSpot', kMode: 'mode', kYards: 'yards', team, start: st.spot, lineToGain: st.lineToGain, quarter: ctx.quarter, field: true, allowYards: true,
+        shortcuts: [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], ends: ['td', 'safety'],
+        getEnd: () => (ev.td ? 'td' : ev.safety ? 'safety' : fumbleOn() ? 'fumble' : ''), setEnd: v => { ev.td = v === 'td'; ev.safety = v === 'safety'; ev.fumble = Object.assign({}, ev.fumble || {}, { on: v === 'fumble' }); } }));
+      if (fumbleOn()) steps.push(...fumbleSteps(g, ev, 'fumble', { team, start: fumbleStart(ev, st, team), quarter: ctx.quarter }));
+      else if (!ev.td) steps.push(playerStep({ id: 'tacklers', q: 'Who made the tackle?', label: 'Tackle by', team: def, ev, key: 'tacklers', multi: true, max: 2, optional: true }));
+    } else if (ev.result === 'incomplete') {
+      steps.push(playerStep({ id: 'receiver', q: 'Thrown to whom?', label: 'Intended for', team, ev, key: 'receiver', optional: true, hint: 'Optional: counts as a target.' }));
+      steps.push(playerStep({ id: 'pbu', q: 'Broken up by?', label: 'Broken up by', team: def, ev, key: 'pbu', multi: true, max: 2, optional: true, hint: 'Optional.' }));
+    } else if (ev.result === 'intercepted') {
+      steps.push(playerStep({ id: 'interceptor', q: 'Who intercepted it?', label: 'Picked by', team: def, ev, key: 'interceptor', optional: true }));
+      steps.push(spotStep({ id: 'intSpot', q: 'Where was it intercepted?', label: 'Picked at', ev, kSpot: 'intSpot', kMode: 'intSpotMode', team, start: st.spot, defaultSpot: st.spot, deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds downfield' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true,
+        shortcuts: [{ v: 'tb', l: 'In the end zone (touchback)' }], ends: ['tb'], getEnd: () => (ev.intTouchback ? 'tb' : ''), setEnd: v => { ev.intTouchback = v === 'tb'; } }));
+      if (!ev.intTouchback) { const is = E.num(ev.intSpot, st.spot); steps.push(spotStep({ id: 'intRet', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'intEndSpot', kMode: 'intMode', kYards: 'intYards', team: def, start: is, defaultSpot: is, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'Return yards', quarter: ctx.quarter, field: true, allowYards: true,
+        shortcuts: [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }], ends: ['td'], getEnd: () => (ev.intTd ? 'td' : ''), setEnd: v => { ev.intTd = v === 'td'; } })); }
+    } else if (ev.result === 'sack') {
+      steps.push(spotStep({ id: 'spot', q: 'Sacked where?', label: 'Sacked at', ev, kSpot: 'endSpot', kMode: 'mode', kYards: 'yards', team, start: st.spot, lineToGain: st.lineToGain, quarter: ctx.quarter, field: true, allowYards: true, yardsLabel: 'yards lost',
+        shortcuts: [{ v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], ends: ['safety'], getEnd: () => (ev.safety ? 'safety' : fumbleOn() ? 'fumble' : ''), setEnd: v => { ev.safety = v === 'safety'; ev.fumble = Object.assign({}, ev.fumble || {}, { on: v === 'fumble' }); } }));
+      if (fumbleOn()) steps.push(...fumbleSteps(g, ev, 'fumble', { team, start: fumbleStart(ev, st, team), quarter: ctx.quarter }));
+      else steps.push(playerStep({ id: 'tacklers', q: 'Who got the sack?', label: 'Sack by', team: def, ev, key: 'tacklers', multi: true, max: 2, optional: true, hint: 'Two players split the sack.' }));
+    }
+    return steps;
+  };
+
+  flows.punt = (g, ev, ctx) => {
+    const st = ctx.state, steps = [], L = E.settingsOf(g).fieldLength;
+    if (!ev.team) ev.team = st.possession || 'home';
+    if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team is punting?', g));
+    const K = ev.team, Rt = E.opp(K);
+    if (ev.punter == null) ev.punter = UI.lastPlayer[K + ':punter'] || '';
+    steps.push(playerStep({ id: 'punter', q: 'Who punted?', label: 'Punter', team: K, ev, key: 'punter', optional: true, skip: () => !!ev.punter }));
+    steps.push(choiceStep({ id: 'puntResult', q: 'What happened?', label: 'Result', options: [{ v: 'return', l: 'Returned' }, { v: 'fair_catch', l: 'Fair catch' }, { v: 'downed', l: 'Downed' }, { v: 'oob', l: 'Out of bounds' }, { v: 'touchback', l: 'Touchback' }, { v: 'muff', l: 'Muffed' }, { v: 'blocked', l: 'Blocked' }], get: () => ev.result, set: v => { ev.result = v; ev.td = false; if (ev.fumble) ev.fumble.on = false; ev.recTeam = ''; } }));
+    const landing = () => (ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.puntYards, 0) * E.dir(K), 0, L) : E.num(ev.puntTo, E.clamp(st.spot + 35 * E.dir(K), 0, L)));
+    if (ev.result === 'blocked') {
+      if (!ev.recTeam) ev.recTeam = Rt;
+      steps.push(playerStep({ id: 'blockedBy', q: 'Who blocked it?', label: 'Blocked by', team: Rt, ev, key: 'blockedBy', optional: true }));
+      steps.push(teamPlayerStep({ id: 'blockRec', q: 'Who recovered?', label: 'Recovered by', ev, kTeam: 'recTeam', kPlayer: 'recBy', defaultTeam: Rt, onTeam: () => { ev.td = false; } }));
+      steps.push(spotStep({ id: 'blockSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: st.spot, defaultSpot: st.spot, deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds past the line' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true,
+        shortcuts: ev.recTeam === Rt ? [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }] : [], ends: ['td'], getEnd: () => (ev.td ? 'td' : ''), setEnd: v => { ev.td = v === 'td'; } }));
+    } else if (ev.result && ev.result !== 'touchback') {
+      steps.push(spotStep({ id: 'puntTo', q: ev.result === 'return' || ev.result === 'muff' ? 'Where was it caught?' : ev.result === 'fair_catch' ? 'Fair caught where?' : ev.result === 'oob' ? 'Where did it go out?' : 'Downed where?', label: 'Punt to', ev, kSpot: 'puntTo', kMode: 'mode', kYards: 'puntYards', team: K, start: st.spot, defaultSpot: E.clamp(st.spot + 35 * E.dir(K), 0, L), deltaLabel: y => 'Punt of ' + E.fmtYard(y), yardsLabel: 'punt distance', quarter: ctx.quarter, field: true, allowYards: true }));
+      if (ev.result === 'return') {
+        steps.push(playerStep({ id: 'returner', q: 'Who returned it?', label: 'Returner', team: Rt, ev, key: 'returner', optional: true }));
+        const ld = landing();
+        steps.push(spotStep({ id: 'retTo', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'endSpot', kMode: 'retMode', kYards: 'retYards', team: Rt, start: ld, defaultSpot: ld, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'return yards', quarter: ctx.quarter, field: true, allowYards: true,
+          shortcuts: [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumbled' }], ends: ['td'], getEnd: () => (ev.td ? 'td' : (ev.fumble && ev.fumble.on ? 'fumble' : '')), setEnd: v => { ev.td = v === 'td'; ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v === 'fumble' }); } }));
+        if (ev.fumble && ev.fumble.on) steps.push(...fumbleSteps(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? ld + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, ld)), quarter: ctx.quarter }));
+      } else if (ev.result === 'fair_catch') {
+        steps.push(playerStep({ id: 'returner', q: 'Who caught it?', label: 'Caught by', team: Rt, ev, key: 'returner', optional: true }));
+      } else if (ev.result === 'muff') {
+        if (!ev.recTeam) ev.recTeam = K;
+        steps.push(playerStep({ id: 'returner', q: 'Who muffed it?', label: 'Muffed by', team: Rt, ev, key: 'returner', optional: true }));
+        steps.push(teamPlayerStep({ id: 'muffRec', q: 'Who recovered?', label: 'Recovered by', ev, kTeam: 'recTeam', kPlayer: 'recBy', defaultTeam: K }));
+        const ld = landing();
+        steps.push(spotStep({ id: 'muffSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: ld, defaultSpot: ld, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
+      }
+    }
+    return steps;
+  };
+
+  flows.kickoff = (g, ev, ctx) => {
+    const st = ctx.state, steps = [], L = E.settingsOf(g).fieldLength;
+    if (!ev.team) ev.team = st.kickTeam || st.possession || 'home';
+    const K = ev.team, Rt = E.opp(K);
+    const isFree = st.phase === 'free_kick';
+    const from = () => ((st.phase === 'kickoff' || st.phase === 'free_kick') && st.kickTeam === K ? st.spot : E.kickSpotFor(K, g, isFree ? 'safety' : 'kickoff'));
+    if (!(st.phase === 'kickoff' || st.phase === 'free_kick') || st.kickTeam !== K) steps.push(choiceStep({ id: 'kickTeam', q: 'Which team is kicking?', label: 'Kicking team', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name })), get: () => ev.team, set: v => { ev.team = v; } }));
+    if (ev.kicker == null) ev.kicker = UI.lastPlayer[K + ':kicker'] || '';
+    steps.push(playerStep({ id: 'kicker', q: 'Who kicked off?', label: 'Kicker', team: K, ev, key: 'kicker', optional: true, skip: () => !!ev.kicker }));
+    steps.push(choiceStep({ id: 'koResult', q: 'What happened?', label: 'Result', options: [{ v: 'return', l: 'Returned' }, { v: 'touchback', l: 'Touchback' }, { v: 'fair_catch', l: 'Fair catch' }, { v: 'oob', l: 'Out of bounds' }, { v: 'onside', l: 'Onside kick' }, { v: 'muff', l: 'Muffed' }], get: () => ev.result, set: v => { ev.result = v; ev.td = false; if (ev.fumble) ev.fumble.on = false; } }));
+    const defLanding = ev.result === 'onside' ? E.clamp(from() + 10 * E.dir(K), 0, L) : E.clamp(E.goal(K, L) - 5 * E.dir(K), 0, L);
+    const landing = () => (ev.mode === 'yards' ? E.clamp(from() + E.num(ev.kickYards, 0) * E.dir(K), 0, L) : E.num(ev.kickTo, defLanding));
+    if (ev.result && ev.result !== 'touchback') {
+      steps.push(spotStep({ id: 'kickTo', q: ev.result === 'oob' ? 'Where did it go out?' : ev.result === 'onside' ? 'Where was it recovered?' : 'Where was it caught?', label: 'Kick to', ev, kSpot: 'kickTo', kMode: 'mode', kYards: 'kickYards', team: K, start: from(), defaultSpot: defLanding, deltaLabel: y => 'Kick of ' + E.fmtYard(y), yardsLabel: 'kick distance', quarter: ctx.quarter, field: true, allowYards: true }));
+    }
+    if (ev.result === 'return') {
+      steps.push(playerStep({ id: 'returner', q: 'Who returned it?', label: 'Returner', team: Rt, ev, key: 'returner', optional: true }));
+      const ld = landing();
+      steps.push(spotStep({ id: 'retTo', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'endSpot', kMode: 'retMode', kYards: 'retYards', team: Rt, start: ld, defaultSpot: ld, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'return yards', quarter: ctx.quarter, field: true, allowYards: true,
+        shortcuts: [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumbled' }], ends: ['td'], getEnd: () => (ev.td ? 'td' : (ev.fumble && ev.fumble.on ? 'fumble' : '')), setEnd: v => { ev.td = v === 'td'; ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v === 'fumble' }); } }));
+      if (ev.fumble && ev.fumble.on) steps.push(...fumbleSteps(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? ld + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, ld)), quarter: ctx.quarter }));
+    } else if (ev.result === 'oob') {
+      const ld = landing();
+      steps.push(spotStep({ id: 'oobSpot', q: 'Where does ' + ab(g, Rt) + ' take over?', label: 'Ball at', ev, kSpot: 'oobSpot', kMode: 'oobMode', team: Rt, start: ld, defaultSpot: ld, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
+    } else if (ev.result === 'onside' || ev.result === 'muff') {
+      if (!ev.recTeam) ev.recTeam = K;
+      steps.push(teamPlayerStep({ id: 'koRec', q: 'Who recovered?', label: 'Recovered by', ev, kTeam: 'recTeam', kPlayer: 'recBy', defaultTeam: K }));
+      const ld = landing();
+      steps.push(spotStep({ id: 'koRecSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: ld, defaultSpot: ld, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
+    }
+    return steps;
+  };
+
+  // distance keypad plus the three outcomes on one screen
+  function fgStep(g, ev, ctx) {
+    const st = ctx.state, L = E.settingsOf(g).fieldLength, K = ev.team;
+    const autoDist = Math.round(E.toGoal(K, st.spot, L) + 17);
+    const dist = () => (ev.distance != null && ev.distance !== '' ? E.num(ev.distance, autoDist) : autoDist);
+    return {
+      id: 'fg', q: 'How long, and was it good?', label: 'Kick',
+      valid: () => !!ev.result,
+      summary: () => dist() + ' yds' + (ev.result ? ', ' + ({ good: 'good', no_good: 'no good', blocked: 'blocked' })[ev.result] : ''),
+      render(body, api) {
+        const read = h('div', { class: 'spot-read' }, h('div', null, h('div', { class: 'yard num' }, dist() + ' yds'), h('div', { class: 'delta' }, 'from the ' + E.fmtSpot(st.spot, g) + ' · ' + E.fmtYard(E.toGoal(K, st.spot, L)) + ' to the goal + 17')));
+        const kp = makeKeypad({ kind: 'int', max: 99, get: dist, set: v => { ev.distance = v; read.querySelector('.yard').textContent = dist() + ' yds'; api.refresh(); } });
+        const res = h('div', { class: 'choices' });
+        [{ v: 'good', l: 'Good', cls: 'gold' }, { v: 'no_good', l: 'No good' }, { v: 'blocked', l: 'Blocked' }].forEach(x => res.append(h('button', { type: 'button', class: 'choice' + (ev.result === x.v ? ' on' : '') + ' ' + (x.cls || ''), onclick: () => { ev.result = x.v; if (x.v !== 'no_good') ev.missResult = ''; if (api.isLast()) api.rerender(); else api.next(); } }, h('b', null, x.l))));
+        body.append(read, kp.el, res);
+      }
+    };
+  }
+  flows.fg = (g, ev, ctx) => {
+    const st = ctx.state, steps = [];
+    if (!ev.team) ev.team = st.possession || 'home';
+    if (notPlay(st, ev.team)) steps.push(offenseStep(ev, 'Which team is kicking?', g));
+    const K = ev.team, Rt = E.opp(K), S = E.settingsOf(g);
+    if (ev.kicker == null) ev.kicker = UI.lastPlayer[K + ':kicker'] || '';
+    steps.push(playerStep({ id: 'kicker', q: 'Who kicked?', label: 'Kicker', team: K, ev, key: 'kicker', optional: true, skip: () => !!ev.kicker }));
+    steps.push(fgStep(g, ev, ctx));
+    if (ev.result === 'no_good') {
+      if (!ev.missResult) ev.missResult = 'touchback';
+      steps.push(choiceStep({ id: 'miss', q: 'Where does ' + ab(g, Rt) + ' get the ball?', label: 'After the miss', options: [{ v: 'touchback', l: 'Touchback', sub: 'their ' + S.touchbackSpot }, { v: 'los', l: 'Spot of the kick' }, { v: 'spot', l: 'Somewhere else' }], get: () => ev.missResult, set: v => { ev.missResult = v; } }));
+      if (ev.missResult === 'spot') steps.push(spotStep({ id: 'missSpot', q: 'Ball placed where?', label: 'Ball at', ev, kSpot: 'missSpot', kMode: 'missMode', team: Rt, start: st.spot, defaultSpot: st.spot, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
+    } else if (ev.result === 'blocked') {
+      if (!ev.recTeam) ev.recTeam = Rt;
+      steps.push(playerStep({ id: 'blockedBy', q: 'Who blocked it?', label: 'Blocked by', team: Rt, ev, key: 'blockedBy', optional: true }));
+      steps.push(teamPlayerStep({ id: 'blockRec', q: 'Who recovered?', label: 'Recovered by', ev, kTeam: 'recTeam', kPlayer: 'recBy', defaultTeam: Rt, onTeam: () => { ev.td = false; } }));
+      steps.push(spotStep({ id: 'blockSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: st.spot, defaultSpot: st.spot, deltaLabel: () => '', quarter: ctx.quarter, field: true,
+        shortcuts: ev.recTeam === Rt ? [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }] : [], ends: ['td'], getEnd: () => (ev.td ? 'td' : ''), setEnd: v => { ev.td = v === 'td'; } }));
+    }
+    return steps;
+  };
+
+  flows.pat = (g, ev, ctx) => {
+    const st = ctx.state, steps = [], S = E.settingsOf(g);
+    if (!ev.team) ev.team = st.possession || 'home';
+    if (st.phase !== 'try') steps.push(choiceStep({ id: 'tryTeam', q: 'Which team is trying?', label: 'Team', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name })), get: () => ev.team, set: v => { ev.team = v; } }));
+    const T = ev.team;
+    steps.push(choiceStep({ id: 'kind', q: 'Kick, run or pass?', label: 'Try', options: [{ v: 'kick', l: 'Kick', sub: S.ptsKick + ' point' }, { v: 'run', l: 'Run', sub: S.pts2pt + ' points' }, { v: 'pass', l: 'Pass', sub: S.pts2pt + ' points' }], get: () => ev.kind, set: v => { ev.kind = v; if (ev.result === 'blocked' && v !== 'kick') ev.result = ''; } }));
+    if (ev.kind === 'kick') { if (ev.kicker == null) ev.kicker = UI.lastPlayer[T + ':kicker'] || ''; steps.push(playerStep({ id: 'kicker', q: 'Who kicked?', label: 'Kicker', team: T, ev, key: 'kicker', optional: true, skip: () => !!ev.kicker })); }
+    if (ev.kind === 'run') steps.push(playerStep({ id: 'carrier', q: 'Who ran it?', label: 'Carrier', team: T, ev, key: 'carrier', optional: true }));
+    if (ev.kind === 'pass') { if (ev.passer == null) ev.passer = UI.lastPlayer[T + ':passer'] || ''; steps.push(playerStep({ id: 'passer', q: 'Who threw it?', label: 'Passer', team: T, ev, key: 'passer', optional: true, skip: () => !!ev.passer })); steps.push(playerStep({ id: 'receiver', q: 'Thrown to whom?', label: 'Receiver', team: T, ev, key: 'receiver', optional: true })); }
+    if (ev.kind) steps.push(choiceStep({ id: 'patResult', q: 'Good?', label: 'Result', options: [{ v: 'good', l: 'Good', cls: 'gold' }, { v: 'no_good', l: ev.kind === 'kick' ? 'No good' : 'Failed' }].concat(ev.kind === 'kick' ? [{ v: 'blocked', l: 'Blocked' }] : []), get: () => ev.result, set: v => { ev.result = v; } }));
+    return steps;
+  };
+
+  function enforceStep(g, ev, ctx) {
+    const st = ctx.state, off = st.possession || 'home';
+    const lastPlay = st.snapshot ? E.dd(st.snapshot, g) : null;
+    const R = getR();
+    const prevText = st.snapshotIndex >= 0 && R && R.derived[st.snapshotIndex] ? R.derived[st.snapshotIndex].text : '';
+    return {
+      id: 'enforce', q: 'How is it enforced?', label: 'Enforcement',
+      valid: () => ev.status !== 'accepted' || E.num(ev.yards, 0) >= 0,
+      summary: () => ev.status === 'declined' ? 'Declined' : ev.status === 'offsetting' ? 'Offsetting' : E.num(ev.yards, 0) + ' yds from ' + (ev.from === 'previous' ? 'the previous spot' : 'the ball') + (ev.downResult === 'auto' ? ', auto 1st' : ev.downResult === 'loss' ? ', loss of down' : ''),
+      render(body, api) {
+        const mk = (label, opts, get, set) => {
+          const row = h('div', { class: 'bigseg wrap' });
+          const draw = () => row.replaceChildren(...opts.map(x => h('button', { type: 'button', class: get() === x.v ? 'on' : '', onclick: () => { set(x.v); draw(); api.rerender(); } }, x.l)));
+          draw();
+          return h('div', { class: 'fld' }, h('div', { class: 'lbl' }, label), row);
+        };
+        const yardRow = h('div', { class: 'bigseg' });
+        const yardRead = h('span', { class: 'yard num', style: 'font-size:28px' }, String(E.num(ev.yards, 0)));
+        const padWrap = h('div', { hidden: true });
+        const kp = makeKeypad({ kind: 'int', max: 99, get: () => E.num(ev.yards, 0), set: v => { ev.yards = v; yardRead.textContent = String(v); drawYards(); api.refresh(); } });
+        padWrap.append(kp.el);
+        const drawYards = () => yardRow.replaceChildren(...[5, 10, 15].map(n => h('button', { type: 'button', class: E.num(ev.yards, 0) === n ? 'on' : '', onclick: () => { ev.yards = n; yardRead.textContent = String(n); kp.reset(); drawYards(); padWrap.hidden = true; api.refresh(); } }, n + ' yds')), h('button', { type: 'button', class: [5, 10, 15].includes(E.num(ev.yards, 0)) ? '' : 'on', onclick: () => { padWrap.hidden = !padWrap.hidden; } }, 'Other'));
+        drawYards();
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'row', style: 'justify-content:space-between' }, h('div', { class: 'lbl' }, 'Yards'), yardRead), yardRow, padWrap));
+        body.append(mk('Status', [{ v: 'accepted', l: 'Accepted' }, { v: 'declined', l: 'Declined' }, { v: 'offsetting', l: 'Offsetting' }], () => ev.status, v => { ev.status = v; }));
+        if (ev.status === 'accepted') {
+          body.append(mk('Marked off from', [{ v: 'current', l: 'Where the ball is' }, { v: 'previous', l: 'Previous spot' }], () => ev.from, v => { ev.from = v; }));
+          body.append(h('div', { class: 'help' }, ev.from === 'previous'
+            ? (lastPlay ? 'Wipes out the last play (' + prevText + ') and marks off from the ' + E.fmtSpot(st.snapshot.spot, g) + ' with ' + lastPlay + '.' : 'There is no play to wipe out, so this is marked off from where the ball is.')
+            : 'The last play stands. Dead-ball fouls (false start, offside, delay, late hits) and fouls tacked on after a play.'));
+          if (st.phase === 'play' || (ev.from === 'previous' && st.snapshot && st.snapshot.phase === 'play')) body.append(mk('Down', [{ v: 'keep', l: ev.from === 'previous' ? 'Replay the down' : 'Same down' }, { v: 'auto', l: 'Automatic 1st' }, { v: 'loss', l: 'Loss of down' }], () => ev.downResult || 'keep', v => { ev.downResult = v; }));
+        } else if (ev.status === 'offsetting') body.append(h('div', { class: 'help' }, lastPlay ? 'Offsetting: the last play is wiped out and the down is replayed from the ' + E.fmtSpot(st.snapshot.spot, g) + '.' : 'Offsetting: no yardage, the down is replayed.'));
+        else body.append(h('div', { class: 'help' }, 'Declined: the play stands and nothing moves. It is only noted in the log.'));
+        body.append(h('button', { type: 'button', class: 'linkbtn', style: 'align-self:flex-start', onclick: () => { ev.override = ev.override ? null : {}; api.rerender(); } }, ev.override ? 'Remove the hand adjustment' : 'Adjust the result by hand…'));
+      }
+    };
+  }
+  function overrideStep(g, ev, ctx) {
+    const st = ctx.state, L = E.settingsOf(g).fieldLength;
+    const o = ev.override || (ev.override = {});
+    const poss = () => o.possession || (ev.from === 'previous' && st.snapshot ? st.snapshot.possession : st.possession) || 'home';
+    return {
+      id: 'override', q: 'Set the result by hand', label: 'Adjusted',
+      valid: () => true,
+      summary: () => [o.possession ? ab(g, o.possession) + ' ball' : '', o.spot != null && o.spot !== '' ? 'at the ' + E.fmtSpot(E.num(o.spot, 0), g) : '', o.down ? E.ordinal(o.down) + ' down' : '', o.distance === 'goal' ? 'goal to go' : (o.distance != null && o.distance !== '' ? '& ' + o.distance : '')].filter(Boolean).join(', ') || 'no changes',
+      render(body, api) {
+        body.append(h('div', { class: 'help' }, 'Only what you change here overrides the computed result.'));
+        const teamRow = h('div', { class: 'bigseg' });
+        const drawTeam = () => teamRow.replaceChildren(...['home', 'away'].map(t => h('button', { type: 'button', class: poss() === t ? 'on' : '', onclick: () => { o.possession = t; drawTeam(); api.refresh(); } }, ab(g, t) + ' ball')));
+        drawTeam();
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Possession'), teamRow));
+        const spotRead = h('span', { class: 'yard num', style: 'font-size:28px' }, o.spot != null && o.spot !== '' ? E.fmtSpot(E.num(o.spot, st.spot), g) : 'unchanged');
+        const sides = h('div', { class: 'bigseg' });
+        const curAbs = () => (o.spot != null && o.spot !== '' ? E.num(o.spot, st.spot) : st.spot);
+        const curSide = () => { const q = E.spotParts(curAbs(), L); return q.side === 'mid' ? E.opp(poss()) : q.side; };
+        const drawSides = () => sides.replaceChildren(...['home', 'away'].map(t => h('button', { type: 'button', class: curSide() === t ? 'on' : '', onclick: () => { o.spot = E.absFrom(t, E.spotParts(curAbs(), L).yard, L); spotRead.textContent = E.fmtSpot(o.spot, g); drawSides(); api.refresh(); } }, ab(g, t))));
+        drawSides();
+        const kp = makeKeypad({ kind: 'yardline', max: L / 2, mid: L / 2, get: () => E.spotParts(curAbs(), L).yard, set: y => { o.spot = E.absFrom(curSide(), E.clamp(y, 0, L / 2), L); spotRead.textContent = E.fmtSpot(o.spot, g); drawSides(); api.refresh(); } });
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'row', style: 'justify-content:space-between' }, h('div', { class: 'lbl' }, 'Ball spot'), spotRead), sides, kp.el));
+        const downRow = h('div', { class: 'bigseg' });
+        const drawDown = () => downRow.replaceChildren(...[1, 2, 3, 4].map(n => h('button', { type: 'button', class: E.num(o.down, 0) === n ? 'on' : '', onclick: () => { o.down = E.num(o.down, 0) === n ? '' : n; drawDown(); api.refresh(); } }, E.ordinal(n))));
+        drawDown();
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Down'), downRow));
+        const distRow = h('div', { class: 'bigseg wrap' });
+        const drawDist = () => distRow.replaceChildren(...[['goal', 'Goal to go'], [10, '& 10'], [5, '& 5'], [1, '& 1'], [15, '& 15'], [20, '& 20']].map(([v, l]) => h('button', { type: 'button', class: o.distance === v ? 'on' : '', onclick: () => { o.distance = o.distance === v ? '' : v; drawDist(); api.refresh(); } }, l)));
+        drawDist();
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Distance'), distRow));
+      }
+    };
+  }
+  flows.penalty = (g, ev, ctx) => {
+    const st = ctx.state, off = st.possession || 'home', def = E.opp(off);
+    if (!ev.status) ev.status = 'accepted';
+    if (!ev.from) ev.from = 'current';
+    if (!ev.downResult) ev.downResult = 'keep';
+    if (ev.yards == null) ev.yards = 5;
+    const steps = [];
+    steps.push(choiceStep({ id: 'foul', q: 'What was the foul?', label: 'Foul', cols: 2, options: E.PENALTY_PRESETS.map(p => ({ v: p.name, l: p.name, sub: p.yards + ' yds' })), get: () => ev.name, set: name => {
+      const p = E.PENALTY_PRESETS.find(x => x.name === name); ev.name = name;
+      if (p) { ev.yards = p.yards; ev.from = p.from; ev.downResult = p.down; if (p.side === 'off') ev.against = off; else if (p.side === 'def') ev.against = def; }
+    } }));
+    if (!ev.against) ev.against = def;
+    steps.push(teamPlayerStep({ id: 'against', q: 'On whom?', label: 'Against', ev, kTeam: 'against', kPlayer: 'player', defaultTeam: ev.against, teams: st.phase === 'play' ? { [off]: ab(g, off) + ' (offense)', [def]: ab(g, def) + ' (defense)' } : null }));
+    steps.push(enforceStep(g, ev, ctx));
+    if (ev.override) steps.push(overrideStep(g, ev, ctx));
+    return steps;
+  };
+
+  flows.situation = (g, ev, ctx) => {
+    const st = ctx.state, L = E.settingsOf(g).fieldLength;
+    if (ev.possession == null) ev.possession = st.possession || 'home';
+    if (ev.phase == null) ev.phase = (st.phase === 'final' ? 'play' : (st.phase === 'free_kick' ? 'kickoff' : st.phase));
+    if (ev.spot == null) ev.spot = st.spot;
+    if (ev.down == null) ev.down = st.down;
+    if (ev.distance == null) ev.distance = st.lineToGain == null ? 10 : (Math.abs(st.lineToGain - E.goal(st.possession || 'home', L)) < 1e-9 ? 'goal' : Math.abs(st.lineToGain - st.spot));
+    if (ev.quarter == null) ev.quarter = st.quarter;
+    if (ev.homeScore == null) ev.homeScore = st.score.home;
+    if (ev.awayScore == null) ev.awayScore = st.score.away;
+    if (ev.homeTimeouts == null) ev.homeTimeouts = st.timeouts.home;
+    if (ev.awayTimeouts == null) ev.awayTimeouts = st.timeouts.away;
+    const steps = [];
+    steps.push(choiceStep({ id: 'what', q: 'What happens next?', label: 'Next', options: [{ v: 'play', l: 'Scrimmage play' }, { v: 'kickoff', l: 'Kickoff' }, { v: 'try', l: 'PAT / 2-pt' }], get: () => ev.phase, set: v => { ev.phase = v; if (v === 'try') ev.spot = E.trySpot(ev.possession, g); if (v === 'kickoff') ev.spot = E.kickSpotFor(ev.possession, g, 'kickoff'); } }));
+    steps.push(choiceStep({ id: 'who', q: ev.phase === 'kickoff' ? 'Who is kicking?' : 'Who has the ball?', label: 'Ball', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name })), get: () => ev.possession, set: v => { ev.possession = v; if (ev.phase === 'try') ev.spot = E.trySpot(v, g); if (ev.phase === 'kickoff') ev.spot = E.kickSpotFor(v, g, 'kickoff'); } }));
+    steps.push(spotStep({ id: 'where', q: ev.phase === 'kickoff' ? 'Kicking from where?' : 'Where is the ball?', label: 'Ball at', ev, kSpot: 'spot', kMode: 'spotMode', team: ev.possession, start: E.num(ev.spot, st.spot), defaultSpot: E.num(ev.spot, st.spot), deltaLabel: () => '', quarter: E.num(ev.quarter, st.quarter), field: true }));
+    if (ev.phase === 'play') steps.push(choiceStep({ id: 'down', q: 'What down?', label: 'Down', options: [1, 2, 3, 4].map(n => ({ v: n, l: E.ordinal(n) })), get: () => E.num(ev.down, 1), set: v => { ev.down = v; } }));
+    if (ev.phase === 'play') steps.push(choiceStep({ id: 'dist', q: 'And how far?', label: 'To go', options: [['goal', 'Goal to go'], [10, '& 10'], [1, '& 1'], [2, '& 2'], [3, '& 3'], [4, '& 4'], [5, '& 5'], [6, '& 6'], [7, '& 7'], [8, '& 8'], [9, '& 9'], [12, '& 12'], [15, '& 15'], [20, '& 20'], [25, '& 25']].map(([v, l]) => ({ v, l })), get: () => ev.distance, set: v => { ev.distance = v; } }));
+    steps.push({
+      id: 'clock', q: 'Quarter, score and timeouts', label: 'Game',
+      valid: () => true,
+      summary: () => 'Q' + ev.quarter + ' · ' + ab(g, 'home') + ' ' + E.num(ev.homeScore, 0) + ' – ' + ab(g, 'away') + ' ' + E.num(ev.awayScore, 0),
+      render(body, api) {
+        const qRow = h('div', { class: 'bigseg' });
+        const drawQ = () => qRow.replaceChildren(...[1, 2, 3, 4, 5].map(n => h('button', { type: 'button', class: E.num(ev.quarter, 1) === n ? 'on' : '', onclick: () => { ev.quarter = n; drawQ(); api.refresh(); } }, n === 5 ? 'OT' : 'Q' + n)));
+        drawQ();
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Quarter'), qRow));
+        const counter = (label, key, max) => {
+          const val = h('span', { class: 'yard num', style: 'font-size:28px;min-width:44px;text-align:center' }, String(E.num(ev[key], 0)));
+          const btn = (d, l) => h('button', { type: 'button', class: 'btn sm', onclick: () => { ev[key] = E.clamp(E.num(ev[key], 0) + d, 0, max); val.textContent = String(ev[key]); api.refresh(); } }, l);
+          return h('div', { class: 'row', style: 'justify-content:space-between' }, h('span', { class: 'grow' }, label), btn(-1, '−'), val, btn(1, '+'));
+        };
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Score'), counter(g.teams.home.name, 'homeScore', 199), counter(g.teams.away.name, 'awayScore', 199)));
+        body.append(h('div', { class: 'fld' }, h('div', { class: 'lbl' }, 'Timeouts left'), counter(g.teams.home.name, 'homeTimeouts', 9), counter(g.teams.away.name, 'awayTimeouts', 9)));
+      }
+    });
+    return steps;
+  };
+
+  flows.timeout = (g, ev, ctx) => {
+    const st = ctx.state;
+    return [choiceStep({ id: 'team', q: 'Timeout by whom?', label: 'Timeout', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name, sub: st.timeouts[t] + ' left' })), get: () => ev.team, set: v => { ev.team = v; } })];
+  };
+  flows.safety = (g, ev, ctx) => {
+    return [choiceStep({ id: 'team', q: 'Two points for whom?', label: 'Safety', options: ['home', 'away'].map(t => ({ v: t, l: g.teams[t].name })), get: () => ev.team, set: v => { ev.team = v; }, help: 'For a safety on a run or a sack, enter that play and tap Safety on it so the tackle counts. Use this for any other safety (a foul in the end zone, a blocked punt through the end zone).' })];
+  };
+  flows.note = (g, ev) => [{
+    id: 'note', q: 'Note for the log', label: 'Note', valid: () => true, summary: () => ev.text || '',
+    render(body, api) { body.append(h('input', { type: 'text', value: ev.text || '', placeholder: 'Injury timeout, lightning delay, …', oninput: e => { ev.text = e.target.value; api.refresh(); } })); }
+  }];
+
+  const TITLES = { rush: 'Run', pass: 'Pass', punt: 'Punt', kickoff: 'Kickoff', fg: 'Field goal', pat: 'PAT / 2-pt', penalty: 'Penalty', situation: 'Set the situation', timeout: 'Timeout', safety: 'Safety', note: 'Note', period_end: 'End of quarter', game_end: 'End of game' };
+
+  // open the wizard for a new event (appended), an edit (index) or an insert (insertAt)
+  function openForm(type, o) {
+    o = o || {};
+    const g = game(); if (!g || !flows[type]) return;
+    let ev, index = null, insertAt = null;
+    if (o.index != null) { index = o.index; ev = E.clone(g.events[index]); }
+    else { ev = Object.assign({ type }, o.preset || {}); if (o.insertAt != null) insertAt = o.insertAt; }
+    const at = index != null ? index : (insertAt != null ? insertAt : g.events.length);
+    const state = at >= g.events.length ? getR().final : E.stateBefore(g, at);
+    const ctx = { state, index: at, quarter: state.quarter };
+    openWizard({
+      title: (index != null ? 'Edit ' : (insertAt != null ? 'Insert ' : '')) + (o.title || TITLES[type] || type),
+      ev, ctx, flow: flows[type], startAtLast: index != null,
+      saveLabel: index != null ? 'Save changes' : 'Add to log',
+      onSave: done => {
+        if (done.type === 'penalty' && done.status === 'accepted' && !(E.num(done.yards, 0) >= 0)) return { error: 'Enter the penalty yards.' };
+        commit(gg => { if (index != null) gg.events[index] = done; else if (insertAt != null) gg.events.splice(insertAt, 0, done); else gg.events.push(done); }, index != null ? 'Play updated — everything after it recomputed' : null);
+      }
+    });
+  }
+
+  C.flows = flows; C.forms = flows; C.openForm = openForm; C.TITLES = TITLES;
 })();
 
 /* Chain Crew UI — views: scoreboard, game console, log, stats, setup/more, exports, boot. */
@@ -2644,7 +2754,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   function helpText(b) {
     const p = t => b.append(h('p', { class: 'help' }, t));
     p('Every play you enter goes into the log. The score, down and distance, ball spot, possession and all the stats are recomputed from the log every time, so you can edit, delete or insert any play at any time and everything after it corrects itself. Undo takes back your last change.');
-    p('Numbers are typed on the app\u2019s own keypad at the bottom of each play screen, so the phone keyboard never pops up during a game. A spot is a team side plus a yard line (the way the announcer calls it): tap 3, 4 for the 34, and the side buttons to switch sides. You can also tap the field picture, use the \u22121/+1 and \u22125/+5 buttons, or switch to yards gained. The field picture only shows which direction each team is going; flipping it never changes a play. It flips by itself after the 1st and 3rd quarters.');
+    p('Each play is a short series of questions, one per screen: who had the ball, where it ended, who made the tackle. Tap a player and it moves on by itself; numbers go in on the app\u2019s own keypad (tap 3, 4 for the 34), on the field picture, or with the \u22121/+1 buttons. The phone keyboard never pops up. The chips across the top show what you have entered so far; tap one to go back and change it. The result is shown before you tap Add to log.');
+    p('The field picture only shows which direction each team is going; flipping it never changes a play. It flips by itself after the 1st and 3rd quarters.');
     p('Penalties: pick the foul, who it is on, accepted or declined, and whether it is marked off from where the ball is (dead-ball fouls, or fouls tacked on after a play) or from the previous spot (the last play is wiped out and its stats removed). Half the distance is applied automatically. The Result box shows the new down and distance before you save, and you can adjust it by hand when the officials do something unusual.');
     p('Sacks count as rushing attempts for the quarterback (high-school and college convention). Two tacklers on a play each get an assist, and share a sack or tackle for loss. Kneel-downs count as rushes. All of this can be changed under Rules & scoring.');
     p('If the app and the field ever disagree, tap Set situation and type in what the chain crew has. The plays already entered stay as they are.');
