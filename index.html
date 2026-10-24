@@ -1059,6 +1059,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const S = settingsOf(game), Q = (S.quarterMinutes || 12) * 60;
     const events = game.events || [];
     const absTime = (quarter, remaining) => (Math.max(1, quarter) - 1) * Q + (Q - clamp(remaining, 0, Q));
+    // a reading at index i is the clock as of the start of event i; a play's end reading (clockEnd) is as of the start of event i+1
     const pts = [];
     events.forEach((ev, i) => {
       const d = derived[i]; if (!d) return;
@@ -1066,18 +1067,29 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       if (i === 0 && (ev.type === 'kickoff' || ev.type === 'clock')) pts.push({ i, t: absTime(q, Q), explicit: false });
       const c = parseClock(ev.clock);
       if (c != null) pts.push({ i, t: absTime(q, c), explicit: true });
+      const ce = parseClock(ev.clockEnd);
+      if (ce != null) pts.push({ i: i + 1, t: absTime(d.after.quarter, ce), explicit: true });
       if (ev.type === 'period_end' || ev.type === 'game_end') pts.push({ i, t: absTime(q, 0), explicit: false });
     });
+    pts.sort((a, b) => a.i - b.i || a.t - b.t);
+    // who the clock is running for during event i: the receiving team on a kick, otherwise whoever has the ball at the snap
+    const during = i => { const ev = events[i], d = derived[i]; if (!d) return null; if (ev.type === 'kickoff') return opp(d.before.kickTeam || d.before.possession); return d.before.possession; };
     const top = { home: 0, away: 0 };
     let explicit = 0, approx = false; pts.forEach(p => { if (p.explicit) explicit++; });
     for (let k = 0; k + 1 < pts.length; k++) {
       const A = pts[k], B = pts[k + 1];
-      const el = B.t - A.t; if (el <= 0) continue;
+      const el = B.t - A.t; if (el <= 0 || B.i <= A.i) continue;
       if (!A.explicit && !B.explicit) approx = true; // a span with no reading at either end is split by play count
       const counts = { home: 0, away: 0 }; let any = 0;
-      for (let i = A.i; i < B.i; i++) { const ev = events[i], d = derived[i]; if (!d || d.nullified) continue; if (ev.type === 'rush' || ev.type === 'pass') { counts[d.before.possession] += 1; any++; } }
+      const others = { home: 0, away: 0 }; let anyOther = 0;
+      for (let i = A.i; i < B.i; i++) {
+        const ev = events[i], d = derived[i]; if (!d || d.nullified) continue;
+        if (ev.type === 'rush' || ev.type === 'pass') { counts[d.before.possession] += 1; any++; }
+        else if (ev.type === 'punt' || ev.type === 'kickoff' || ev.type === 'fg') { const t = during(i); if (t) { others[t] += 1; anyOther++; } }
+      }
       if (any) { top.home += el * counts.home / any; top.away += el * counts.away / any; }
-      else { const d = derived[A.i]; const poss = d && (d.after.phase === 'kickoff' || d.after.phase === 'free_kick' ? d.after.kickTeam : d.after.possession); if (poss && d.after.phase !== 'final') top[poss] += el; }
+      else if (anyOther) { top.home += el * others.home / anyOther; top.away += el * others.away / anyOther; }
+      else { const t = during(A.i); const d = derived[A.i]; if (t && d && d.before.phase !== 'final') top[t] += el; }
     }
     return { home: Math.round(top.home), away: Math.round(top.away), clocks: explicit, reliable: explicit >= 2, approx };
   }
@@ -1989,13 +2001,35 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
 
   const flows = {};
   const notPlay = (st, team) => st.phase !== 'play' || st.possession !== team;
+  // the most recent clock reading before this play, if it was in the same quarter
+  const lastReading = (g, ctx) => {
+    const R = getR(); if (!R) return '';
+    for (let i = Math.min(ctx.index, g.events.length) - 1; i >= 0; i--) {
+      const e = g.events[i], d = R.derived[i];
+      if (!d || d.before.quarter !== ctx.state.quarter) return '';
+      if (e.clockEnd) return e.clockEnd;
+      if (e.clock) return e.clock;
+    }
+    return '';
+  };
   // ask for the game clock on the first play of a drive (when the setting is on and nobody just logged it)
   const driveClock = (g, ev, ctx) => {
     const S = E.settingsOf(g), st = ctx.state;
     const prev = ctx.prev;
-    const wanted = S.askClock !== false && st.phase === 'play' && !(st.drivePlays > 0) && !(prev && (prev.type === 'clock' || prev.clock));
+    const wanted = S.askClock !== false && st.phase === 'play' && !(st.drivePlays > 0) && !(prev && prev.type === 'clock');
     if (!wanted && !ev.clock) return [];
-    return [clockStep({ ev, key: 'clock', quarterSeconds: (S.quarterMinutes || 12) * 60, q: 'Game clock at the snap?', hint: 'First play of the drive: enter the clock for time of possession, or skip it. Typed like a microwave: 1, 1, 4, 2 is 11:42.' })];
+    if (ev.clock === undefined) { const last = lastReading(g, ctx); if (last) ev.clock = last; }
+    return [clockStep({ ev, key: 'clock', quarterSeconds: (S.quarterMinutes || 12) * 60, q: 'Game clock at the snap?', hint: 'First play of the drive. The last reading is filled in, so tap Next if the clock has not moved, or type the new time like a microwave: 1, 1, 4, 2 is 11:42.' })];
+  };
+  // ask for the clock when a play ends the possession (punt, turnover, downs, score)
+  const driveEndClock = (g, ev, ctx) => {
+    const S = E.settingsOf(g), st = ctx.state;
+    if (S.askClock === false && !ev.clockEnd) return [];
+    if (st.phase !== 'play') return [];
+    const a = C.previewFor(g, ctx, ev).after; if (!a) return [];
+    const ended = a.possession !== st.possession || a.phase !== 'play' || a.driveNo !== st.driveNo;
+    if (!ended && !ev.clockEnd) return [];
+    return [clockStep({ ev, key: 'clockEnd', id: 'clockEnd', label: 'Clock at the end', quarterSeconds: (S.quarterMinutes || 12) * 60, q: 'Clock when the drive ended?', hint: 'The game clock when this play was over' + (ev.clock ? ' (it was ' + ev.clock + ' at the snap)' : '') + '. Typed like a microwave: 9, 5, 0 is 9:50.' })];
   };
   const fumbleStart = (ev, st, team) => () => (ev.mode === 'yards' ? E.clamp(st.spot + E.num(ev.yards, 0) * E.dir(team), 0, E.settingsOf(game()).fieldLength) : E.num(ev.endSpot, st.spot));
 
@@ -2011,6 +2045,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       getEnd: () => (['td', 'oob', 'fumble', 'safety'].includes(ev.result) ? ev.result : ''), setEnd: v => { ev.result = v || 'tackled'; } }));
     if (ev.result === 'fumble') steps.push(...fumbleSteps(g, ev, 'fumble', { team, start: fumbleStart(ev, st, team), quarter: ctx.quarter }));
     else if (ev.result !== 'td' && !ev.kneel) steps.push(playerStep({ id: 'tacklers', q: 'Who made the tackle?', label: 'Tackle by', team: def, ev, key: 'tacklers', multi: true, max: 2, optional: true }));
+    steps.push(...driveEndClock(g, ev, ctx));
     return steps;
   };
 
@@ -2047,6 +2082,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       if (fumbleOn()) steps.push(...fumbleSteps(g, ev, 'fumble', { team, start: fumbleStart(ev, st, team), quarter: ctx.quarter }));
       else steps.push(playerStep({ id: 'tacklers', q: 'Who got the sack?', label: 'Sack by', team: def, ev, key: 'tacklers', multi: true, max: 2, optional: true, hint: 'Two players split the sack.' }));
     }
+    steps.push(...driveEndClock(g, ev, ctx));
     return steps;
   };
 
@@ -2084,6 +2120,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         steps.push(spotStep({ id: 'muffSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: ld, defaultSpot: ld, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
       }
     }
+    steps.push(...driveEndClock(g, ev, ctx));
     return steps;
   };
 
@@ -2158,6 +2195,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       steps.push(spotStep({ id: 'blockSpot', q: 'Recovered where?', label: 'Recovered at', ev, kSpot: 'recSpot', kMode: 'recMode', team: K, start: st.spot, defaultSpot: st.spot, deltaLabel: () => '', quarter: ctx.quarter, field: true,
         shortcuts: ev.recTeam === Rt ? [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }] : [], ends: ['td'], getEnd: () => (ev.td ? 'td' : ''), setEnd: v => { ev.td = v === 'td'; } }));
     }
+    steps.push(...driveEndClock(g, ev, ctx));
     return steps;
   };
 
@@ -2514,7 +2552,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       if (f.firstDown && ev.type !== 'penalty') tags.push(h('span', { class: 'tag', style: 'border:1px solid var(--good);color:var(--good)' }, '1st'));
       items.push(h('button', { type: 'button', class: 'ev' + (d.nullified ? ' nul' : ''), onclick: () => eventMenu(i) },
         h('span', { class: 'n' }, String(i + 1)),
-        h('span', null, h('div', { class: 'dd' }, E.dd(d.before, g), ev.clock ? ' · ' + ev.clock : ''), h('div', { class: 'tx' }, d.text, ...tags), ev.note ? h('div', { class: 'sub' }, ev.note) : null)));
+        h('span', null, h('div', { class: 'dd' }, E.dd(d.before, g), ev.clock ? ' · ' + ev.clock : '', ev.clockEnd ? ' → ' + ev.clockEnd : ''), h('div', { class: 'tx' }, d.text, ...tags), ev.note ? h('div', { class: 'sub' }, ev.note) : null)));
     }
     wrap.append(h('div', null, ...items));
   }
@@ -2697,7 +2735,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     g.events.forEach((ev, i) => {
       const d = R.derived[i];
       if (d.before.quarter !== lastQ) { lastQ = d.before.quarter; lines.push('', (lastQ > 4 ? 'OVERTIME' : 'QUARTER ' + lastQ), ''); }
-      lines.push((d.nullified ? '[wiped out] ' : '') + pad(E.dd(d.before, g), 24) + (ev.clock ? '(' + ev.clock + ') ' : '') + d.text + (d.flags.scored ? '  [' + ab(g, 'home') + ' ' + d.after.score.home + ', ' + ab(g, 'away') + ' ' + d.after.score.away + ']' : ''));
+      lines.push((d.nullified ? '[wiped out] ' : '') + pad(E.dd(d.before, g), 24) + (ev.clock || ev.clockEnd ? '(' + (ev.clock || '') + (ev.clockEnd ? '→' + ev.clockEnd : '') + ') ' : '') + d.text + (d.flags.scored ? '  [' + ab(g, 'home') + ' ' + d.after.score.home + ', ' + ab(g, 'away') + ' ' + d.after.score.away + ']' : ''));
     });
     return lines.join('\n');
   }
@@ -2796,7 +2834,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       if (d.before.quarter !== lastQ) { lastQ = d.before.quarter; body.push([{ content: lastQ > 4 ? 'OVERTIME' : 'QUARTER ' + lastQ, colSpan: 3, styles: { fontStyle: 'bold', fillColor: [29, 92, 51], textColor: 255 } }]); }
       const f = d.flags || {};
       const dim = d.nullified ? { textColor: 150, fontStyle: 'italic' } : {};
-      body.push([{ content: String(i + 1), styles: dim }, { content: E.dd(d.before, g) + (ev.clock ? '\n' + ev.clock : ''), styles: dim }, { content: (d.nullified ? '[wiped out] ' : '') + d.text + (f.scored ? '   (' + ab(g, 'home') + ' ' + d.after.score.home + ', ' + ab(g, 'away') + ' ' + d.after.score.away + ')' : ''), styles: Object.assign({}, dim, f.scored && !d.nullified ? { fontStyle: 'bold' } : {}) }]);
+      body.push([{ content: String(i + 1), styles: dim }, { content: E.dd(d.before, g) + (ev.clock || ev.clockEnd ? '\n' + (ev.clock || '') + (ev.clockEnd ? ' → ' + ev.clockEnd : '') : ''), styles: dim }, { content: (d.nullified ? '[wiped out] ' : '') + d.text + (f.scored ? '   (' + ab(g, 'home') + ' ' + d.after.score.home + ', ' + ab(g, 'away') + ' ' + d.after.score.away + ')' : ''), styles: Object.assign({}, dim, f.scored && !d.nullified ? { fontStyle: 'bold' } : {}) }]);
     });
     doc.autoTable({ startY: 76, margin: { left: M, right: M }, tableWidth: W, styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 2.5, halign: 'left', textColor: 20, lineColor: [215, 220, 215], lineWidth: 0.4, overflow: 'linebreak' }, headStyles: { fillColor: [60, 70, 65], textColor: 255 }, columnStyles: { 0: { cellWidth: 26, halign: 'right' }, 1: { cellWidth: 96 } }, head: [['#', 'Situation', 'Play']], body });
     pdfFooter(doc, g);
@@ -2908,7 +2946,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     p('The field picture only shows which direction each team is going; flipping it never changes a play. It flips by itself after the 1st and 3rd quarters.');
     p('Penalties: pick the foul, who it is on, accepted or declined, and whether it is marked off from where the ball is (dead-ball fouls, or fouls tacked on after a play) or from the previous spot (the last play is wiped out and its stats removed). Half the distance is applied automatically. The Result box shows the new down and distance before you save, and you can adjust it by hand when the officials do something unusual.');
     p('Sacks count as rushing attempts for the quarterback (high-school and college convention). Two tacklers on a play each get an assist, and share a sack or tackle for loss. Kneel-downs count as rushes. All of this can be changed under Rules & scoring.');
-    p('Time of possession: on the first play of each drive the app asks for the game clock (type it like a microwave, 1, 1, 4, 2 for 11:42, or skip). You can also log the clock any time with the Clock button. Possession time is worked out from those readings and the quarter ends.');
+    p('Time of possession: on the first play of each drive the app asks for the game clock, and on the play that ends a possession (punt, turnover, score) it asks for the clock when the play was over. Type it like a microwave (1, 1, 4, 2 for 11:42), tap Next to accept the reading already filled in, or skip. The Clock button logs a reading any other time. Possession time is worked out from those readings and the quarter ends.');
     p('Under More, "Our team, opponent players & clock" lets you turn off the other team\u2019s player screens entirely, so their plays only ask where the ball ended and which of your players made the tackle.');
     p('If the app and the field ever disagree, tap Set situation and type in what the chain crew has. The plays already entered stay as they are.');
     p('Everything is stored on this phone only. Copy a backup after each game.');
