@@ -523,6 +523,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const retEnd = f && f.td ? goal(recTeam, L) : clamp(num(f && f.retSpot, recSpot), 0, L);
     const retYds = gain(recTeam, recSpot, retEnd);
     if (f && f.recBy != null && f.recBy !== '' && retYds) D(deltas, recTeam, f.recBy, 'frYds', retYds);
+    if (f && !f.td) tackleCredit(deltas, team, f.retTacklers, 0, false);
     if (f && f.td) {
       if (f.recBy != null && f.recBy !== '') { D(deltas, recTeam, f.recBy, 'defTD'); D(deltas, recTeam, f.recBy, 'points', settingsOf(game).ptsTD); }
       addScore(st, recTeam, settingsOf(game).ptsTD, deltas, flags);
@@ -647,6 +648,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
             const ry = gain(def, intSpot, intEnd);
             flags.intSpot = intSpot; flags.intEnd = intEnd; flags.intYds = ry;
             if (ev.interceptor != null && ev.interceptor !== '') D(deltas, def, ev.interceptor, 'intYds', ry);
+            if (!ev.intTd) tackleCredit(deltas, team, ev.retTacklers, 0, false);
             if (ev.intTd) {
               if (ev.interceptor != null && ev.interceptor !== '') { D(deltas, def, ev.interceptor, 'intTD'); D(deltas, def, ev.interceptor, 'defTD'); D(deltas, def, ev.interceptor, 'points', S.ptsTD); }
               addScore(st, def, S.ptsTD, deltas, flags); flags.td = def;
@@ -716,6 +718,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           flags.retYds = ry; flags.end = end;
           if (ev.returner != null && ev.returner !== '') { D(deltas, R, ev.returner, 'pr'); D(deltas, R, ev.returner, 'prYds', ry); D(deltas, R, ev.returner, 'prLong', ry); }
           D(deltas, R, null, 'pr'); D(deltas, R, null, 'prYds', ry);
+          if (!ev.td) tackleCredit(deltas, K, ev.retTacklers, 0, false);
           if (ev.td) { if (ev.returner != null && ev.returner !== '') { D(deltas, R, ev.returner, 'prTD'); D(deltas, R, ev.returner, 'points', S.ptsTD); } addScore(st, R, S.ptsTD, deltas, flags); flags.td = R; setTry(st, R, game); }
           else if (ev.fumble && ev.fumble.on) {
             const f = Object.assign({}, ev.fumble); if (!f.recTeam) f.recTeam = K;
@@ -759,6 +762,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           flags.retYds = ry; flags.end = end;
           if (ev.returner != null && ev.returner !== '') { D(deltas, R, ev.returner, 'kr'); D(deltas, R, ev.returner, 'krYds', ry); D(deltas, R, ev.returner, 'krLong', ry); }
           D(deltas, R, null, 'kr'); D(deltas, R, null, 'krYds', ry);
+          if (!ev.td) tackleCredit(deltas, K, ev.retTacklers, 0, false);
           if (ev.td) { if (ev.returner != null && ev.returner !== '') { D(deltas, R, ev.returner, 'krTD'); D(deltas, R, ev.returner, 'points', S.ptsTD); } addScore(st, R, S.ptsTD, deltas, flags); flags.td = R; setTry(st, R, game); }
           else if (ev.fumble && ev.fumble.on) {
             const f = Object.assign({}, ev.fumble); if (!f.recTeam) f.recTeam = K;
@@ -1088,6 +1092,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           if (ev.intTouchback) s += ', touchback';
           else if (ev.intTd) s += ', returned ' + ydsTxt(f.intYds) + ' for a TOUCHDOWN ' + ab(def);
           else if (f.intYds) s += ', returned ' + ydsTxt(f.intYds) + ' to the ' + fmtSpot(f.intEnd, game);
+          if (!ev.intTouchback && !ev.intTd) s += tacklersTxt(game, team, ev.retTacklers);
         } else if (ev.result === 'sack') {
           s = P + ' sacked for ' + ydsTxt(f.yards) + (ev.safety ? ', SAFETY' : ' to the ' + fmtSpot(f.end, game)) + tacklersTxt(game, def, ev.tacklers);
           if (ev.fumble && ev.fumble.on) s += ', FUMBLE' + fumbleTxt(game, team, ev.fumble, f);
@@ -1107,7 +1112,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           s += ' to the ' + fmtSpot(f.landing, game) + ', ' + pname(game, R, ev.returner) + ' return ' + ydsTxt(f.retYds);
           if (ev.td) s += ' for a TOUCHDOWN ' + ab(R);
           else if (ev.fumble && ev.fumble.on) s += ', FUMBLE' + fumbleTxt(game, R, Object.assign({ recTeam: team }, ev.fumble), f);
-          else s += ' to the ' + fmtSpot(f.end, game);
+          else s += ' to the ' + fmtSpot(f.end, game) + tacklersTxt(game, team, ev.retTacklers);
         }
         break;
       }
@@ -1123,7 +1128,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           s += ' to the ' + fmtSpot(f.landing, game) + ', ' + pname(game, R, ev.returner) + ' return ' + ydsTxt(f.retYds);
           if (ev.td) s += ' for a TOUCHDOWN ' + ab(R);
           else if (ev.fumble && ev.fumble.on) s += ', FUMBLE' + fumbleTxt(game, R, Object.assign({ recTeam: K }, ev.fumble), f);
-          else s += ' to the ' + fmtSpot(f.end, game);
+          else s += ' to the ' + fmtSpot(f.end, game) + tacklersTxt(game, K, ev.retTacklers);
         } else s += ' to the ' + fmtSpot(f.landing, game);
         break;
       }
@@ -1170,6 +1175,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     if (fu.recSpot != null && fu.recSpot !== '') s += ' at the ' + fmtSpot(Number(fu.recSpot), game);
     if (fu.td) s += ', returned for a TOUCHDOWN';
     else if (fu.retSpot != null && fu.retSpot !== '' && Number(fu.retSpot) !== Number(fu.recSpot)) s += ', returned to the ' + fmtSpot(Number(fu.retSpot), game);
+    if (!fu.td && rt !== team) s += tacklersTxt(game, team, fu.retTacklers);
     return s;
   }
 
@@ -1891,6 +1897,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     if (f.recTeam !== o.team) {
       const rs = E.num(f.recSpot, start);
       steps.push(spotStep({ id: key + 'Ret', q: 'Returned to?', label: 'Returned to', ev: f, kSpot: 'retSpot', kMode: 'retMode', team: f.recTeam, start: rs, defaultSpot: rs, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', quarter: o.quarter, field: true, shortcuts: [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }], ends: ['td'], getEnd: () => (f.td ? 'td' : ''), setEnd: v => { f.td = v === 'td'; } }));
+      if (!f.td) steps.push(playerStep({ id: key + 'Tacklers', q: 'Who made the tackle?', label: 'Tackle by', team: o.team, ev: f, key: 'retTacklers', multi: true, max: 2, optional: true }));
     }
     return steps;
   }
@@ -1950,7 +1957,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       steps.push(spotStep({ id: 'intSpot', q: 'Where was it intercepted?', label: 'Picked at', ev, kSpot: 'intSpot', kMode: 'intSpotMode', team, start: st.spot, defaultSpot: st.spot, deltaLabel: y => y >= 0 ? E.fmtYard(y) + ' yds downfield' : E.fmtYard(-y) + ' yds behind the line', quarter: ctx.quarter, field: true,
         shortcuts: [{ v: 'tb', l: 'In the end zone (touchback)' }], ends: ['tb'], getEnd: () => (ev.intTouchback ? 'tb' : ''), setEnd: v => { ev.intTouchback = v === 'tb'; } }));
       if (!ev.intTouchback) { const is = E.num(ev.intSpot, st.spot); steps.push(spotStep({ id: 'intRet', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'intEndSpot', kMode: 'intMode', kYards: 'intYards', team: def, start: is, defaultSpot: is, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'Return yards', quarter: ctx.quarter, field: true, allowYards: true,
-        shortcuts: [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }], ends: ['td'], getEnd: () => (ev.intTd ? 'td' : ''), setEnd: v => { ev.intTd = v === 'td'; } })); }
+        shortcuts: [{ v: 'td', l: 'Returned for a touchdown', cls: 'gold' }], ends: ['td'], getEnd: () => (ev.intTd ? 'td' : ''), setEnd: v => { ev.intTd = v === 'td'; } }));
+        if (!ev.intTd) steps.push(playerStep({ id: 'retTacklers', q: 'Who made the tackle?', label: 'Tackle by', team, ev, key: 'retTacklers', multi: true, max: 2, optional: true })); }
     } else if (ev.result === 'sack') {
       steps.push(spotStep({ id: 'spot', q: 'Sacked where?', label: 'Sacked at', ev, kSpot: 'endSpot', kMode: 'mode', kYards: 'yards', team, start: st.spot, lineToGain: st.lineToGain, quarter: ctx.quarter, field: true, allowYards: true, yardsLabel: 'yards lost',
         shortcuts: [{ v: 'fumble', l: 'Fumble' }, { v: 'safety', l: 'Safety' }], ends: ['safety'], getEnd: () => (ev.safety ? 'safety' : fumbleOn() ? 'fumble' : ''), setEnd: v => { ev.safety = v === 'safety'; ev.fumble = Object.assign({}, ev.fumble || {}, { on: v === 'fumble' }); } }));
@@ -1983,6 +1991,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
         steps.push(spotStep({ id: 'retTo', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'endSpot', kMode: 'retMode', kYards: 'retYards', team: Rt, start: ld, defaultSpot: ld, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'return yards', quarter: ctx.quarter, field: true, allowYards: true,
           shortcuts: [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumbled' }], ends: ['td'], getEnd: () => (ev.td ? 'td' : (ev.fumble && ev.fumble.on ? 'fumble' : '')), setEnd: v => { ev.td = v === 'td'; ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v === 'fumble' }); } }));
         if (ev.fumble && ev.fumble.on) steps.push(...fumbleSteps(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? ld + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, ld)), quarter: ctx.quarter }));
+        else if (!ev.td) steps.push(playerStep({ id: 'retTacklers', q: 'Who made the tackle?', label: 'Tackle by', team: K, ev, key: 'retTacklers', multi: true, max: 2, optional: true }));
       } else if (ev.result === 'fair_catch') {
         steps.push(playerStep({ id: 'returner', q: 'Who caught it?', label: 'Caught by', team: Rt, ev, key: 'returner', optional: true }));
       } else if (ev.result === 'muff') {
@@ -2017,6 +2026,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       steps.push(spotStep({ id: 'retTo', q: 'Returned to?', label: 'Returned to', ev, kSpot: 'endSpot', kMode: 'retMode', kYards: 'retYards', team: Rt, start: ld, defaultSpot: ld, deltaLabel: y => y ? 'Return of ' + E.fmtYard(y) : 'No return', yardsLabel: 'return yards', quarter: ctx.quarter, field: true, allowYards: true,
         shortcuts: [{ v: 'td', l: 'Touchdown', cls: 'gold' }, { v: 'fumble', l: 'Fumbled' }], ends: ['td'], getEnd: () => (ev.td ? 'td' : (ev.fumble && ev.fumble.on ? 'fumble' : '')), setEnd: v => { ev.td = v === 'td'; ev.fumble = Object.assign({ recTeam: K }, ev.fumble || {}, { on: v === 'fumble' }); } }));
       if (ev.fumble && ev.fumble.on) steps.push(...fumbleSteps(g, ev, 'fumble', { team: Rt, start: () => (ev.retMode === 'yards' ? ld + E.num(ev.retYards, 0) * E.dir(Rt) : E.num(ev.endSpot, ld)), quarter: ctx.quarter }));
+      else if (!ev.td) steps.push(playerStep({ id: 'retTacklers', q: 'Who made the tackle?', label: 'Tackle by', team: K, ev, key: 'retTacklers', multi: true, max: 2, optional: true }));
     } else if (ev.result === 'oob') {
       const ld = landing();
       steps.push(spotStep({ id: 'oobSpot', q: 'Where does ' + ab(g, Rt) + ' take over?', label: 'Ball at', ev, kSpot: 'oobSpot', kMode: 'oobMode', team: Rt, start: ld, defaultSpot: ld, deltaLabel: () => '', quarter: ctx.quarter, field: true }));
