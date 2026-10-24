@@ -241,6 +241,15 @@ details.adv > .stack { padding-bottom: 12px; }
 .kp-key.bs { font-size: 20px; }
 .kp-key[disabled] { opacity: .3; }
 .kp-big { font-family: var(--font-display); font-size: 40px; font-weight: 700; text-align: center; }
+.kp-keys.wide { grid-template-columns: 1.15fr 1fr 1fr 1fr; }
+.kp-key.team { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border-top: 4px solid var(--team); }
+.kp-key.team b { font-size: 20px; letter-spacing: .04em; }
+.kp-key.team span { font-family: var(--font-body); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.kp-key.team.on { background: var(--fg); color: var(--bg); border-color: var(--fg); border-top-color: var(--team); }
+.kp-key.team.on span { color: var(--bg); opacity: .75; }
+.kp-key.pressed { background: var(--fg); color: var(--bg); }
+.kp-keys.shake { animation: kp-shake .3s; }
+@keyframes kp-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .wiz input[type="text"] { font-size: 18px; min-height: 52px; }
 
 /* log */
@@ -1230,6 +1239,22 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     return Array.from(byNum.values());
   }
 
+  /* ---------- field length conversion ----------
+     Spots are absolute yards from the HOME goal line, so changing the field length moves every
+     spot on the AWAY half by the difference; each team's own yard lines stay the same. */
+  function convertFieldLength(g, newL) {
+    const S = settingsOf(g), oldL = S.fieldLength;
+    if (!newL || oldL === newL) return false;
+    const conv = a => { if (a == null || a === '') return a; const x = Number(a); if (!Number.isFinite(x)) return a; if (Math.abs(x - oldL / 2) < 1e-9) return newL / 2; return x > oldL / 2 ? x + (newL - oldL) : x; };
+    const KEYS = ['endSpot', 'intSpot', 'intEndSpot', 'puntTo', 'kickTo', 'recSpot', 'retSpot', 'oobSpot', 'missSpot', 'fromSpot', 'spot'];
+    const walk = o => { if (!o || typeof o !== 'object') return; KEYS.forEach(k => { if (k in o) o[k] = conv(o[k]); }); if (o.fumble) walk(o.fumble); if (o.override) walk(o.override); };
+    (g.events || []).forEach(walk);
+    g.settings = Object.assign({}, g.settings, { fieldLength: newL });
+    if (newL === 100) Object.assign(g.settings, { kickoffSpot: 40, touchbackSpot: 20, safetyKickSpot: 20 });
+    else if (newL === 80) Object.assign(g.settings, { kickoffSpot: 30, touchbackSpot: 15, safetyKickSpot: 15 });
+    return true;
+  }
+
   /* ---------- game factory ---------- */
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
   function newGame(opts) {
@@ -1264,7 +1289,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     dir, opp, goal, ownGoal, gain, toGoal, half, clamp, num, settingsOf,
     kickSpotFor, touchbackSpot, trySpot, spotParts, fmtSpot, fmtYard, absFrom,
     makeState, applyEvent, replay, stateBefore, computeStats, computeDrives,
-    describe, dd, ordinal, pname, newGame, uid, homeOnLeft, clone, parseRoster
+    describe, dd, ordinal, pname, newGame, uid, homeOnLeft, clone, parseRoster, convertFieldLength
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Engine = api;
@@ -1544,48 +1569,76 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
   const game = C.game, getR = C.getR;
 
   /* ---------- keypad (per step) ---------- */
-  // t: {kind:'yardline'|'yards'|'int'|'jersey', get, set, max, mid, onDone}
+  // Taps are taken at the touch level (touchend) so no browser gesture can swallow a key, with click as the mouse fallback.
+  function tappable(el, fn) {
+    let sx = 0, sy = 0, moved = false, touching = false;
+    el.addEventListener('touchstart', e => { touching = true; moved = false; const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+    el.addEventListener('touchmove', e => { const t = e.changedTouches[0]; if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) moved = true; }, { passive: true });
+    el.addEventListener('touchend', e => { if (!touching) return; touching = false; if (moved) return; if (e.cancelable) e.preventDefault(); el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 120); fn(); });
+    el.addEventListener('touchcancel', () => { touching = false; });
+    el.addEventListener('click', e => { if (e.detail === 0 || !touching) fn(); });
+    return el;
+  }
+  // t: {kind:'yardline'|'yards'|'int'|'jersey', get, set, max, mid, onDone, onChange, sides:{options:[{v,l,color}], value(), onChange(v)}}
   function makeKeypad(t) {
-    const el = h('div', { class: 'kp-keys' });
+    const wide = t.kind === 'yardline' && t.sides;
+    const el = h('div', { class: 'kp-keys' + (wide ? ' wide' : '') });
     let buf = '', fresh = true, neg = false;
     const maxv = t.max == null ? 999 : t.max;
     const maxDigits = String(Math.floor(Math.abs(maxv))).length;
-    const alt = h('button', { type: 'button', class: 'kp-key alt', onclick: () => press('alt') }, '');
-    const key = (label, k, cls) => h('button', { type: 'button', class: 'kp-key' + (cls ? ' ' + cls : ''), 'data-k': k, onclick: () => press(k) }, label);
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(d => el.append(key(d, d)));
-    alt.setAttribute('data-k', 'alt');
-    el.append(alt, key('0', '0'), key('⌫', 'bs', 'bs'));
-    el.addEventListener('pointerdown', e => e.preventDefault());
-    function paintAlt() {
+    const key = (label, k, cls) => tappable(h('button', { type: 'button', class: 'kp-key' + (cls ? ' ' + cls : ''), 'data-k': k }, label), () => press(k));
+    const alt = key('', 'alt', 'alt');
+    const sideKeys = [];
+    if (wide) {
+      t.sides.options.forEach(o => {
+        const b = key('', 'side:' + o.v, 'team');
+        b.replaceChildren(h('b', null, o.l), h('span', null, 'side'));
+        b.style.setProperty('--team', o.color || 'var(--line)');
+        sideKeys.push([o.v, b]);
+      });
+    }
+    const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(d => key(d, d));
+    const zero = key('0', '0'), bs = key('⌫', 'bs', 'bs');
+    if (wide) {
+      // 4 columns: team side keys and midfield on the left, digits on the right
+      el.append(sideKeys[0][1], digits[0], digits[1], digits[2], sideKeys[1][1], digits[3], digits[4], digits[5], alt, digits[6], digits[7], digits[8], h('span'), bs, zero, h('span'));
+    } else el.append(...digits, alt, zero, bs);
+    function paint() {
       alt.disabled = false; alt.classList.remove('go');
       if (t.kind === 'yards') alt.textContent = '±';
       else if (t.kind === 'jersey') { alt.textContent = buf ? 'Add #' + buf : 'Add'; alt.classList.toggle('go', !!buf); alt.disabled = !buf; }
       else if (t.kind === 'yardline') alt.textContent = String(t.mid != null ? t.mid : 50);
       else { alt.textContent = ''; alt.disabled = true; }
+      if (wide) { const v = t.sides.value(); sideKeys.forEach(([sv, b]) => b.classList.toggle('on', sv === v)); }
     }
     function apply() {
-      if (t.kind === 'jersey') { if (t.onChange) t.onChange(buf); paintAlt(); return; }
+      if (t.kind === 'jersey') { if (t.onChange) t.onChange(buf); paint(); return; }
       let v = Number(buf || 0);
       if (t.kind === 'yards' && neg) v = -v;
       if (t.max != null) v = Math.min(v, t.max);
       if (t.min != null) v = Math.max(v, t.min);
-      t.set(v); paintAlt();
+      t.set(v); paint();
     }
     function press(k) {
+      if (k.startsWith('side:')) { buf = ''; fresh = true; t.sides.onChange(k.slice(5)); paint(); return; }
       if (k === 'bs') { buf = fresh ? '' : buf.slice(0, -1); fresh = false; apply(); return; }
       if (k === 'alt') {
         if (t.kind === 'yards') { if (fresh) { buf = String(Math.abs(Number(t.get()) || 0)); fresh = false; } neg = !neg; apply(); }
-        else if (t.kind === 'jersey') { const v = buf; if (!v) return; buf = ''; fresh = true; paintAlt(); if (t.onDone) t.onDone(v); }
+        else if (t.kind === 'jersey') { const v = buf; if (!v) return; buf = ''; fresh = true; paint(); if (t.onDone) t.onDone(v); }
         else if (t.kind === 'yardline') { buf = String(t.mid != null ? t.mid : 50); fresh = true; apply(); }
         return;
       }
       if (fresh) { buf = k; fresh = false; if (t.kind === 'yards') neg = false; }
-      else { let nb = buf + k; if (nb.length > maxDigits || Number(nb) > maxv) nb = k; buf = nb; }
+      else {
+        const nb = buf + k;
+        if (nb.length > maxDigits || Number(nb) > maxv) { el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 300); return; } // impossible number: ignore the key
+        buf = nb;
+      }
       apply();
       if (buf.length >= maxDigits) fresh = true;
     }
-    paintAlt();
-    return { el, reset() { buf = ''; fresh = true; neg = t.kind === 'yards' && Number(t.get()) < 0; paintAlt(); } };
+    paint();
+    return { el, paint, reset() { buf = ''; fresh = true; neg = t.kind === 'yards' && Number(t.get()) < 0; paint(); } };
   }
 
   /* ---------- wizard shell ---------- */
@@ -1772,7 +1825,6 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       render(body, api) {
         init();
         const g = api.g, len = L();
-        const sideBtns = h('div', { class: 'bigseg' });
         const yard = h('div', { class: 'yard num' });
         const delta = h('div', { class: 'delta' });
         const ddLine = h('div', { class: 'dd' });
@@ -1786,7 +1838,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           yard.textContent = E.fmtSpot(abs(), g);
           delta.textContent = d; delta.className = 'delta' + (y < 0 ? ' neg' : '');
           const p = api.preview(); ddLine.textContent = p.dd ? '→ ' + p.dd : '';
-          Array.from(sideBtns.children).forEach(b => b.classList.toggle('on', b.dataset.side === curSide()));
+          if (kp) kp.paint();
           if (fieldEl) fieldEl.setMarker(abs());
           const e = endVal();
           Array.from(body.querySelectorAll('.shortcuts button')).forEach(b => b.classList.toggle('on', b.dataset.v === String(e)));
@@ -1795,17 +1847,15 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
           api.refresh();
         };
         const external = () => { if (kp) kp.reset(); refreshText(); };
-        ['home', 'away'].forEach(t => sideBtns.append(h('button', { type: 'button', 'data-side': t, onclick: () => { ev[kMode] = 'spot'; ev[kSpot] = E.absFrom(t, curYard(), len); external(); } }, ab(g, t) + (t === o.team ? ' (own)' : ''))));
+        const sides = { options: ['home', 'away'].map(t => ({ v: t, l: ab(g, t), color: g.teams[t].color })), value: curSide, onChange: t => { ev[kMode] = 'spot'; ev[kSpot] = E.absFrom(t, curYard(), len); refreshText(); } };
+        const hint = h('div', { class: 'help' }, 'Like the announcer: tap ' + ab(g, 'home') + ' or ' + ab(g, 'away') + ' for whose side of the 50, then the yard line.');
         const buildArea = () => {
           area.replaceChildren();
-          if (ev[kMode] === 'spot') {
-            kp = makeKeypad({ kind: 'yardline', max: len / 2, mid: len / 2, get: curYard, set: y => { ev[kSpot] = E.absFrom(curSide(), E.clamp(y, 0, len / 2), len); refreshText(); } });
-            area.append(sideBtns);
-          } else {
-            kp = makeKeypad({ kind: 'yards', max: 99, get: () => E.num(ev[kYards], 0), set: v => { ev[kYards] = v; refreshText(); } });
-          }
+          if (ev[kMode] === 'spot') kp = makeKeypad({ kind: 'yardline', max: len / 2, mid: len / 2, get: curYard, sides, set: y => { ev[kSpot] = E.absFrom(curSide(), E.clamp(y, 0, len / 2), len); refreshText(); } });
+          else kp = makeKeypad({ kind: 'yards', max: 99, get: () => E.num(ev[kYards], 0), set: v => { ev[kYards] = v; refreshText(); } });
           area.append(read);
-          if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: o.start, lineToGain: o.lineToGain, marker: abs(), team: o.team, onPick: a => { ev[kMode] = 'spot'; ev[kSpot] = a; if (!sideBtns.isConnected) { buildArea(); } external(); }, compact: true }); area.append(fieldEl); }
+          if (ev[kMode] === 'spot') area.append(hint);
+          if (o.field) { fieldEl = fieldSVG(g, o.quarter || 1, { spot: o.start, lineToGain: o.lineToGain, marker: abs(), team: o.team, onPick: a => { const wasYards = ev[kMode] !== 'spot'; ev[kMode] = 'spot'; ev[kSpot] = a; if (wasYards) buildArea(); external(); }, compact: true }); area.append(fieldEl); }
           area.append(h('div', { class: 'steppers' }, ...[-5, -1, 1, 5].map(n => h('button', { type: 'button', onclick: () => { if (ev[kMode] === 'yards') ev[kYards] = E.num(ev[kYards], 0) + n; else ev[kSpot] = E.clamp(abs() + n * E.dir(o.team), 0, len); external(); } }, (n > 0 ? '+' : '') + n))));
           area.append(kp.el);
           readRight.replaceChildren(ddLine);
@@ -2286,6 +2336,7 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const driveTxt = drive && st.phase === 'play' && drive.team === st.possession && !drive.result ? ab(g, drive.team) + ' drive · ' + drive.plays + ' play' + (drive.plays === 1 ? '' : 's') + ' · ' + E.fmtYard(drive.yards) + ' yds · started at the ' + E.fmtSpot(drive.start, g) : (st.phase === 'play' && st.possession ? ab(g, st.possession) + ' ball' : '');
     sit.append(h('div', { class: 'row' }, h('span', { class: 'drive' }, driveTxt), h('button', { type: 'button', class: 'linkbtn', onclick: () => openForm('situation') }, 'Set situation')));
     wrap.append(sit);
+    if (L === 80) wrap.append(h('div', { class: 'card flag row', style: 'justify-content:space-between' }, h('div', { class: 'grow' }, h('div', { class: 'lbl' }, '80-yard field'), h('div', { class: 'small' }, 'This game is set to an 80-yard field, so the yard lines stop at 40. Plays already entered are kept.')), h('button', { type: 'button', class: 'btn sm primary', onclick: () => commit(gg => { E.convertFieldLength(gg, 100); }, 'Converted to a 100-yard field') }, 'Switch to 100 yards')));
     const fw = h('div', { class: 'field-wrap' }, fieldSVG(g, st.quarter, { spot: st.phase === 'final' ? null : st.spot, lineToGain: st.phase === 'play' ? st.lineToGain : null, team: st.phase === 'play' ? st.possession : null }),
       h('div', { class: 'row', style: 'justify-content:space-between' }, fieldCaption(g, st.quarter), h('button', { type: 'button', class: 'linkbtn', onclick: () => flipView(g, st.quarter) }, 'Flip view')));
     wrap.append(fw);
@@ -2796,7 +2847,8 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
     const S = E.settingsOf(g);
     const started = g.events.length > 0;
     b.append(field('Field length', seg({ options: [{ v: 100, l: '100 yards' }, { v: 80, l: '80 yards' }], value: S.fieldLength, onChange: v => {
-      commit(gg => { gg.settings.fieldLength = v; if (v === 80) { gg.settings.kickoffSpot = 30; gg.settings.touchbackSpot = 15; gg.settings.safetyKickSpot = 15; } else { gg.settings.kickoffSpot = 40; gg.settings.touchbackSpot = 20; gg.settings.safetyKickSpot = 20; } }, 'Field set to ' + v + ' yards');
+      if (v === S.fieldLength) return;
+      commit(gg => { E.convertFieldLength(gg, v); }, 'Field set to ' + v + ' yards' + (started ? ' — plays already entered were converted' : ''));
     } })));
     b.append(h('div', { class: 'row' },
       field('Kickoff from own', numberInput({ value: S.kickoffSpot, cls: 'yard-input', onInput: v => { g.settings.kickoffSpot = E.num(v, S.kickoffSpot); C.save(); C.recompute(); } })),

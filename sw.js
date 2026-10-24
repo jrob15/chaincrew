@@ -1,5 +1,5 @@
 // Chain Crew service worker: network first, cache fallback, so the app opens offline once it has loaded once.
-const CACHE = 'chaincrew-v3';
+const CACHE = 'chaincrew-v4';
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', e => {
