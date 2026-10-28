@@ -2928,19 +2928,32 @@ tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
       else b.append(h('div', { class: 'help' }, 'Open a game, fill in your roster under its team section, then tap "Save as my team" there. New games will start with it.'));
       if (g) b.append(h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn sm', onclick: () => { DB.myTeam = E.clone(g.teams.home); C.save(); render(); toast('Saved ' + g.teams.home.name + ' as my team'); } }, 'Save ' + ab(g, 'home') + ' as my team'), h('button', { type: 'button', class: 'btn sm', onclick: () => { DB.myTeam = E.clone(g.teams.away); C.save(); render(); toast('Saved ' + g.teams.away.name + ' as my team'); } }, 'Save ' + ab(g, 'away') + ' as my team')));
     }));
-    wrap.append(section('Restore a game from a backup', false, b => {
-      const ta = h('textarea', { placeholder: 'Paste the backup text here' });
-      b.append(ta, h('button', { type: 'button', class: 'btn', onclick: () => {
+    wrap.append(section('Back up or restore all games', false, b => {
+      const restoreText = text => {
         try {
-          const o = JSON.parse(ta.value);
-          if (!o || !o.teams || !Array.isArray(o.events)) throw new Error('not a game');
-          const existed = !!DB.games[o.id];
-          if (!o.id) o.id = E.uid();
-          o.updatedAt = Date.now();
-          DB.games[o.id] = o; if (!DB.order.includes(o.id)) DB.order.unshift(o.id);
-          UI.gameId = o.id; UI.tab = 'game'; C.recompute(); C.save(); render(); toast(existed ? 'Game replaced from backup' : 'Game restored');
+          let o = JSON.parse(text);
+          const games = Array.isArray(o.games) ? o.games : (o.games && typeof o.games === 'object' ? Object.values(o.games) : [o]);
+          let n = 0;
+          games.forEach(gm => {
+            if (!gm || !gm.teams || !Array.isArray(gm.events)) return;
+            if (!gm.id) gm.id = E.uid();
+            gm.updatedAt = gm.updatedAt || Date.now();
+            DB.games[gm.id] = gm; if (!DB.order.includes(gm.id)) DB.order.unshift(gm.id); n++;
+          });
+          if (!n) throw new Error('no games');
+          if (o.myTeam && !DB.myTeam) DB.myTeam = o.myTeam;
+          if (n === 1) { UI.gameId = games[0].id; UI.tab = 'game'; }
+          C.recompute(); C.save(); render(); toast(n === 1 ? 'Game restored' : n + ' games restored');
         } catch (e) { toast('That is not a Chain Crew backup'); }
-      } }, 'Restore'));
+      };
+      b.append(h('div', { class: 'help' }, 'Everything (all games, rosters, my team) in one file. Save it before clearing the browser or moving to another phone, then bring it back here.'));
+      b.append(h('div', { class: 'row' },
+        h('button', { type: 'button', class: 'btn primary', onclick: () => { const all = { chaincrew: 1, savedAt: new Date().toISOString(), myTeam: DB.myTeam, games: DB.order.map(id => DB.games[id]).filter(Boolean) }; saveWithFallback('chaincrew-all-games-' + new Date().toISOString().slice(0, 10) + '.json', () => JSON.stringify(all), 'Backup of all games', () => JSON.stringify(all)); } }, 'Save backup file'),
+        h('button', { type: 'button', class: 'btn', onclick: () => { const all = { chaincrew: 1, savedAt: new Date().toISOString(), myTeam: DB.myTeam, games: DB.order.map(id => DB.games[id]).filter(Boolean) }; showText('Backup of all games (paste into Notes or a message to yourself)', JSON.stringify(all)); } }, 'Copy as text')));
+      const fileIn = h('input', { type: 'file', accept: '.json,application/json,text/plain', id: 'restoreFile', onchange: e => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => restoreText(String(r.result)); r.readAsText(f); e.target.value = ''; } });
+      b.append(h('div', { class: 'lbl', style: 'margin-top:8px' }, 'Restore'), h('label', { class: 'btn', for: 'restoreFile', style: 'display:inline-flex' }, 'Choose a backup file'), h('div', { style: 'position:absolute;left:-9999px' }, fileIn));
+      const ta = h('textarea', { placeholder: 'or paste backup text here' });
+      b.append(ta, h('button', { type: 'button', class: 'btn', onclick: () => restoreText(ta.value) }, 'Restore from text'));
     }));
     wrap.append(section('Appearance', false, b => {
       b.append(field('Theme', seg({ options: [{ v: 'auto', l: 'Auto' }, { v: 'dark', l: 'Dark' }, { v: 'light', l: 'Light' }], value: DB.prefs.theme || 'auto', onChange: v => { DB.prefs.theme = v; C.save(); render(); } })));
