@@ -1,7 +1,7 @@
 # Chain Crew
 
-Football play-by-play stat keeper for 8-man games (editable play log, penalty enforcement, box score, PDF/CSV export).
+Football play-by-play stat keeper for the sideline: step-by-step play entry, editable log, penalty enforcement, time of possession, box score and PDF/CSV export.
 
-Hosted with GitHub Pages: open the site URL in Chrome on a phone and choose **Add to Home screen** to install it. Games are saved on the phone itself.
+**Install on a phone:** open the site in Chrome, then menu (⋮) → **Install app** (or **Add to Home screen**). It opens full screen, works offline after the first load, and the phone's back button steps back inside the app.
 
-To update the app, replace `index.html` (and `sw.js` if it changed) and commit.
+To update the app, replace `index.html` (and `sw.js` when it changed) and commit.
